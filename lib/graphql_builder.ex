@@ -1,7 +1,8 @@
 defmodule GraphqlBuilder do
   @moduledoc false
 
-  def build(data), do: inner_build(data, 0) |> Enum.join("\n")
+  def build(data) when is_struct(data), do: data |> Map.from_struct() |> build
+  def build(data) when is_map(data), do: inner_build(data, 0) |> Enum.join("\n")
 
   def inner_build(data, indentation) when is_map(data) do
     inner = data |> Enum.map(fn d -> inner_build(d, indentation + 1) end)
