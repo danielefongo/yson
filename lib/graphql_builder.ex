@@ -10,8 +10,7 @@ defmodule GraphqlBuilder do
   end
 
   def inner_build({key, value}, indentation) when is_nil(value) do
-    camelized_key = key |> Atom.to_string() |> Recase.to_camel()
-    indent([camelized_key], indentation)
+    indent([camel(key)], indentation)
   end
 
   def inner_build({key, value}, indentation) when is_map(value) do
@@ -19,7 +18,16 @@ defmodule GraphqlBuilder do
     indent(["#{key} {", inner, "}"], indentation)
   end
 
-  defp indent(data, indentation), do: data |> List.flatten() |> Enum.map(fn d -> indent(indentation) <> d end)
+  def inner_build({key, value}, indentation) when is_list(value) do
+    inner = value |> Enum.into(%{}) |> Enum.map(fn d -> inner_build(d, indentation) end)
+    indent(["... on #{pascal(key)} {", inner, "}"], indentation)
+  end
+
+  defp indent(data, indentation),
+    do: data |> List.flatten() |> Enum.map(fn d -> indent(indentation) <> d end)
 
   defp indent(indentation), do: String.duplicate("  ", indentation)
+
+  defp camel(value), do: value |> Atom.to_string() |> Recase.to_camel()
+  defp pascal(value), do: value |> Atom.to_string() |> Recase.to_pascal()
 end
