@@ -42,24 +42,29 @@ defmodule GraphqlBuilder do
     "#{camel(key)}: {" <> inner <> "}"
   end
 
-  def build_body(data) when is_map(data), do: inner_build_body(data, 1) |> Enum.join("\n")
-
-  def inner_build_body(data, indentation) when is_map(data) do
-    inner = data |> Enum.map(fn d -> inner_build_body(d, indentation) end)
-    indent(["{", inner, "}"], indentation)
+  def build_body(method, arguments, data) when is_map(data) do
+    query = build_query(arguments)
+    args = build_arguments(method, arguments)
+    inner = inner_build_body(args, data, 1) |> Enum.join("\n")
+    [query <> " {", inner, "}"] |> Enum.join("\n")
   end
 
-  def inner_build_body({key, value}, indentation) when is_nil(value) do
+  def inner_build_body(prefix, data, indentation) when is_map(data) do
+    inner = data |> Enum.map(fn d -> inner_build_body("", d, indentation) end)
+    indent([prefix <> " {", inner, "}"], indentation)
+  end
+
+  def inner_build_body(_prefix, {key, value}, indentation) when is_nil(value) do
     indent([camel(key)], indentation)
   end
 
-  def inner_build_body({key, value}, indentation) when is_map(value) do
-    inner = value |> Enum.map(fn d -> inner_build_body(d, indentation) end)
+  def inner_build_body(prefix, {key, value}, indentation) when is_map(value) do
+    inner = value |> Enum.map(fn d -> inner_build_body(prefix, d, indentation) end)
     indent(["#{key} {", inner, "}"], indentation)
   end
 
-  def inner_build_body({key, value}, indentation) when is_list(value) do
-    inner = value |> Enum.into(%{}) |> Enum.map(fn d -> inner_build_body(d, indentation) end)
+  def inner_build_body(prefix, {key, value}, indentation) when is_list(value) do
+    inner = value |> Enum.into(%{}) |> Enum.map(fn d -> inner_build_body(prefix, d, indentation) end)
     indent(["... on #{pascal(key)} {", inner, "}"], indentation)
   end
 
