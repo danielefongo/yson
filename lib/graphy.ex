@@ -12,8 +12,8 @@ defmodule Graphy do
   defmacro __before_compile__(_env) do
     module = __CALLER__.module
 
-    body = Module.get_attribute(module, :body, [])
-    object = Module.get_attribute(module, :object, [])
+    body = Module.get_attribute(module, :body)
+    object = Module.get_attribute(module, :object)
 
     quote do
       def query do
@@ -51,9 +51,11 @@ defmodule Graphy do
     body = cleanup(body)
     module = __CALLER__.module
 
+    Module.put_attribute(module, :object, object)
+    Module.put_attribute(module, :body, body)
+
     quote do
-      Module.put_attribute(unquote(module), :object, unquote(object))
-      Module.put_attribute(unquote(module), :body, unquote(body))
+      Enum.into(unquote(body), %{})
     end
   end
 
