@@ -10,9 +10,10 @@ defmodule Graphy.Walker do
   end
 
   defp inner_walk({field, {resolver, resolvers}}, data, path) do
-    inner = resolvers
-    |> Enum.map(fn {key, _} = el -> inner_walk(el, data, path ++ [key]) end)
-    |> Enum.into(%{})
+    inner =
+      resolvers
+      |> Enum.map(fn {key, _} = el -> inner_walk(el, data, path ++ [key]) end)
+      |> Enum.into(%{})
 
     {field, resolver.(inner)}
   end

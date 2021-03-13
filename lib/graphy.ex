@@ -122,9 +122,10 @@ defmodule Graphy do
     nested_fields = fetch_nested_fields(fields, true)
     nested_resolvers = fetch_nested_resolvers(fields, true)
 
-    resolvers = quote do
-      Map.put(%{}, unquote(object), {unquote(resolver), unquote(nested_resolvers)})
-    end
+    resolvers =
+      quote do
+        Map.put(%{}, unquote(object), {unquote(resolver), unquote(nested_resolvers)})
+      end
 
     Module.put_attribute(module, :object, object)
     Module.put_attribute(module, :body, nested_fields)
@@ -150,10 +151,13 @@ defmodule Graphy do
 
   defp fetch_nested_resolvers(fields, to_map \\ false) do
     quote do
-      nested = unquote(fields)
-      |> Enum.map(fn {_, resolver} -> resolver end)
-      |> Enum.map(fn {k, inner} -> if is_map(inner), do: Map.to_list(inner), else: {k, inner} end)
-      |> List.flatten()
+      nested =
+        unquote(fields)
+        |> Enum.map(fn {_, resolver} -> resolver end)
+        |> Enum.map(fn {k, inner} ->
+          if is_map(inner), do: Map.to_list(inner), else: {k, inner}
+        end)
+        |> List.flatten()
 
       if unquote(to_map), do: Enum.into(nested, %{}), else: nested
     end

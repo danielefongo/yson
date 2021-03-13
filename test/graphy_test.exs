@@ -19,7 +19,7 @@ defmodule GraphyTest do
       field :user do
         field(:email)
 
-        resolver &Sample.user/1
+        resolver(&Sample.user/1)
       end
 
       interface :natural_person do
@@ -110,13 +110,13 @@ defmodule GraphyTest do
 
     test "ignore interfaces" do
       {_, resolvers} =
-      field :foo do
-        interface :foo do
-          field(:field)
-        end
+        field :foo do
+          interface :foo do
+            field(:field)
+          end
 
-        resolver(&echo_resolver/1)
-      end
+          resolver(&echo_resolver/1)
+        end
 
       assert resolvers == {
                :foo,

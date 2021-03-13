@@ -7,8 +7,7 @@ defmodule Graphy.WalkerTest do
 
   test "walk shallow" do
     resolvers = %{
-      sample: {&Graphy.void_resolver/1,
-       %{name: &reverse_text/1, surname: &reverse_text/1}}
+      sample: {&Graphy.void_resolver/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
     }
 
     data = %{
@@ -30,11 +29,11 @@ defmodule Graphy.WalkerTest do
 
   test "walk deep" do
     resolvers = %{
-      sample: {&Graphy.void_resolver/1,
-       %{
-         user: {&Graphy.void_resolver/1,
-          %{name: &reverse_text/1, surname: &reverse_text/1}}
-       }}
+      sample:
+        {&Graphy.void_resolver/1,
+         %{
+           user: {&Graphy.void_resolver/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
+         }}
     }
 
     data = %{
@@ -60,8 +59,7 @@ defmodule Graphy.WalkerTest do
 
   test "walk combining resolvers" do
     resolvers = %{
-      sample: {&collapse_name/1,
-       %{name: &reverse_text/1, surname: &reverse_text/1}}
+      sample: {&collapse_name/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
     }
 
     data = %{
