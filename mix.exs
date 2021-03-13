@@ -22,7 +22,11 @@ defmodule Graphy.Builder.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:recase, "~> 0.5"}
+      {:httpoison, "~> 1.7"},
+      {:jason, "~> 1.2.2"},
+      {:recase, "~> 0.5"},
+      {:absinthe, "~> 1.6", only: :test},
+      {:bypass, "~> 2.1.0-rc.0", only: :test}
     ]
   end
 
