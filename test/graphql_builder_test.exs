@@ -7,7 +7,8 @@ defmodule GraphqlBuilderTest do
     end
 
     test "build with root fields" do
-      assert GraphqlBuilder.build_body(%{name: nil, surname: nil}) == "  {\n    name\n    surname\n  }"
+      assert GraphqlBuilder.build_body(%{name: nil, surname: nil}) ==
+               "  {\n    name\n    surname\n  }"
     end
 
     test "build with nested fields" do
@@ -32,31 +33,35 @@ defmodule GraphqlBuilderTest do
 
   describe "for query params" do
     test "build empty" do
-      assert GraphqlBuilder.build_arguments(%{}) == "()"
+      assert GraphqlBuilder.build_arguments(:people, %{}) == "people"
     end
 
     test "build with root arguments" do
-      assert GraphqlBuilder.build_arguments(%{first_name: :string, last_name: :string}) ==
-               "(firstName: $firstName, lastName: $lastName)"
+      assert GraphqlBuilder.build_arguments(:people, %{first_name: :string, last_name: :string}) ==
+               "people(firstName: $firstName, lastName: $lastName)"
     end
 
     test "build with nested arguments" do
-      assert GraphqlBuilder.build_arguments(%{user: %{first_name: :string, last_name: :string}}) ==
-               "(user: {firstName: $firstName, lastName: $lastName})"
+      assert GraphqlBuilder.build_arguments(:people, %{
+               user: %{first_name: :string, last_name: :string}
+             }) ==
+               "people(user: {firstName: $firstName, lastName: $lastName})"
     end
   end
 
   describe "for query" do
     test "build empty" do
-      assert GraphqlBuilder.build_query(:people, %{}) == "query people"
+      assert GraphqlBuilder.build_query(%{}) == "query"
     end
 
     test "build with root arguments" do
-      assert GraphqlBuilder.build_query(:people, %{first_name: :string, age: :integer}) == "query ($age: Integer, $firstName: String) {\n  people"
+      assert GraphqlBuilder.build_query(%{first_name: :string, age: :integer}) ==
+               "query ($age: Integer, $firstName: String)"
     end
 
     test "build with nested arguments" do
-      assert GraphqlBuilder.build_query(:people, %{foo: :integer, user: %{first_name: :string}}) == "query ($foo: Integer, $firstName: String) {\n  people"
+      assert GraphqlBuilder.build_query(%{foo: :integer, user: %{first_name: :string}}) ==
+               "query ($foo: Integer, $firstName: String)"
     end
   end
 end

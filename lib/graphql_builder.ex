@@ -1,12 +1,13 @@
 defmodule GraphqlBuilder do
   @moduledoc false
 
-  def build_query(method, arguments) do
-    inner = case inner_build_query(arguments) do
-      "" -> ""
-      content -> "(" <> content <> ") {\n  "
+  def build_query(arguments) do
+    inner = inner_build_query(arguments)
+
+    case inner do
+      "" -> "query"
+      content -> "query (#{content})"
     end
-    "query #{inner}#{camel(method)}"
   end
 
   defp inner_build_query(data) when data == %{}, do: ""
@@ -19,11 +20,17 @@ defmodule GraphqlBuilder do
 
   defp inner_build_query({_, value}) when is_map(value), do: inner_build_query(value)
 
-  def build_arguments(data) when is_map(data), do: inner_build_arguments(data)
+  def build_arguments(method, data) when is_map(data) do
+    inner = inner_build_arguments(data)
+
+    case inner do
+      "" -> camel(method)
+      content -> "#{method}(" <> content <> ")"
+    end
+  end
 
   defp inner_build_arguments(data) when is_map(data) do
-    inner = data |> Enum.map(fn data -> inner_build_arguments(data) end) |> Enum.join(", ")
-    "(" <> inner <> ")"
+    data |> Enum.map(fn data -> inner_build_arguments(data) end) |> Enum.join(", ")
   end
 
   defp inner_build_arguments({key, value}) when is_atom(value) do
