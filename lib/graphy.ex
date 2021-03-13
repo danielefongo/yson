@@ -12,16 +12,58 @@ defmodule Graphy do
   defmacro __before_compile__(_env) do
     module = __CALLER__.module
 
-    body = Module.get_attribute(module, :body)
+    kind = Module.get_attribute(module, :kind)
     object = Module.get_attribute(module, :object)
+    arguments = Module.get_attribute(module, :arguments)
+    body = Module.get_attribute(module, :body)
 
     quote do
-      def query do
+      def describe do
         %{
+          kind: unquote(kind),
           object: unquote(object),
+          arguments: Enum.into(unquote(arguments), %{}),
           body: Enum.into(unquote(body), %{})
         }
       end
+    end
+  end
+
+  defmacro arg(key, type) when is_atom(type) do
+    quote do
+      {unquote(key), unquote(type)}
+    end
+  end
+
+  defmacro arg(name, _opts \\ [], do: body) do
+    body = cleanup(body, [:arg])
+
+    quote do
+      {unquote(name), Enum.into(unquote(body), %{})}
+    end
+  end
+
+  defmacro query(_opts \\ [], do: body) do
+    body = cleanup(body, [:arg])
+    module = __CALLER__.module
+
+    Module.put_attribute(module, :kind, :query)
+    Module.put_attribute(module, :arguments, body)
+
+    quote do
+      Enum.into(unquote(body), %{})
+    end
+  end
+
+  defmacro mutation(_opts \\ [], do: body) do
+    body = cleanup(body, [:arg])
+    module = __CALLER__.module
+
+    Module.put_attribute(module, :kind, :mutation)
+    Module.put_attribute(module, :arguments, body)
+
+    quote do
+      Enum.into(unquote(body), %{})
     end
   end
 
@@ -32,7 +74,7 @@ defmodule Graphy do
   end
 
   defmacro field(name, _opts \\ [], do: body) do
-    body = cleanup(body)
+    body = cleanup(body, [:field, :interface])
 
     quote do
       {unquote(name), Enum.into(unquote(body), %{})}
@@ -40,7 +82,7 @@ defmodule Graphy do
   end
 
   defmacro interface(name, _opts \\ [], do: body) do
-    body = cleanup(body)
+    body = cleanup(body, [:field, :interface])
 
     quote do
       {unquote(name), unquote(body)}
@@ -48,7 +90,7 @@ defmodule Graphy do
   end
 
   defmacro object(object, _opts \\ [], do: body) do
-    body = cleanup(body)
+    body = cleanup(body, [:field, :interface])
     module = __CALLER__.module
 
     Module.put_attribute(module, :object, object)
@@ -59,10 +101,10 @@ defmodule Graphy do
     end
   end
 
-  defp cleanup(body) do
+  defp cleanup(body, allowed) do
     body
     |> ast_to_list()
-    |> filter_valid_macros()
+    |> filter_valid_macros(allowed)
   end
 
   defp ast_to_list(body) do
@@ -72,7 +114,6 @@ defmodule Graphy do
     end
   end
 
-  defp filter_valid_macros(list),
-    do:
-      Enum.filter(list, fn {func_name, _, _} -> Enum.member?([:field, :interface], func_name) end)
+  defp filter_valid_macros(list, allowed),
+    do: Enum.filter(list, fn {func_name, _, _} -> Enum.member?(allowed, func_name) end)
 end

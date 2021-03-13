@@ -36,9 +36,51 @@ defmodule GraphyTest do
     assert obj == %{one: nil, two: nil}
   end
 
+  test "single argument" do
+    obj = arg(:foo, :string)
+
+    assert obj == {:foo, :string}
+  end
+
+  test "composite argument" do
+    obj =
+      arg :foo do
+        arg(:foo, :string)
+      end
+
+    assert obj == {:foo, %{foo: :string}}
+  end
+
+  test "query" do
+    obj =
+      query do
+        arg(:one, :string)
+        arg(:two, :integer)
+      end
+
+    assert obj == %{one: :string, two: :integer}
+  end
+
+  test "mutation" do
+    obj =
+      mutation do
+        arg(:one, :string)
+        arg(:two, :integer)
+      end
+
+    assert obj == %{one: :string, two: :integer}
+  end
+
   test "generate query" do
     defmodule Sample do
       use Graphy
+
+      query do
+        arg :user do
+          arg(:email, :string)
+          arg(:age, :integer)
+        end
+      end
 
       object :sample do
         field :user do
@@ -56,17 +98,24 @@ defmodule GraphyTest do
       end
     end
 
-    query = Sample.query()
+    description = Sample.describe()
 
-    assert query.object == :sample
+    assert description.object == :sample
 
-    assert query.body == %{
+    assert description.body == %{
              user: %{email: nil},
              natural_person: [
                first_name: nil,
                second_name: nil
              ],
              legal_person: [company_name: nil]
+           }
+
+    assert description.arguments == %{
+             user: %{
+               email: :string,
+               age: :integer
+             }
            }
   end
 end
