@@ -26,8 +26,4 @@ defmodule GraphqlBuilderTest do
   test "build query using camel case" do
     assert GraphqlBuilder.build(%{full_name: nil}) == "{\n  fullName\n}"
   end
-
-  test "build query using struct" do
-    assert GraphqlBuilder.build(%Example{}) == "{\n  age\n  name\n  phone\n}"
-  end
 end
