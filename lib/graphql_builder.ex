@@ -1,20 +1,20 @@
 defmodule GraphqlBuilder do
   @moduledoc false
 
-  def build(%{kind: _kind, object: object, arguments: arguments, body: body}) do
-    query = build_query(arguments)
+  def build(%{kind: kind, object: object, arguments: arguments, body: body}) do
+    query = build_query(arguments, kind)
     arguments = build_arguments(object, arguments)
     body = build_body(body)
     inner = [arguments <> " {"] ++ body ++ ["}"]
     Indent.indent([query <> " {", inner, "}"])
   end
 
-  def build_query(arguments) do
+  def build_query(arguments, kind) do
     inner = inner_build_query(arguments)
 
     case inner do
-      "" -> "query"
-      content -> "query (#{content})"
+      "" -> "#{camel(kind)}"
+      content -> "#{camel(kind)} (#{content})"
     end
   end
 

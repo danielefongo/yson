@@ -69,9 +69,29 @@ defmodule GraphqlBuilderTest do
     end
   end
 
-  defp build_query(object, args, body) do
+  describe "for mutation" do
+    test "build empty" do
+      mutation = build_mutation(:people, %{}, %{})
+      assert mutation =~ "mutation {"
+    end
+
+    test "build with root arguments" do
+      mutation = build_mutation(:people, %{first_name: :string, age: :integer}, %{})
+      assert mutation =~ "mutation ($age: Integer, $firstName: String) {"
+    end
+
+    test "build with nested arguments" do
+      mutation = build_mutation(:people, %{foo: :integer, user: %{first_name: :string}}, %{})
+      assert mutation =~ "mutation ($foo: Integer, $firstName: String) {"
+    end
+  end
+
+  defp build_query(object, args, body), do: build(:query, object, args, body)
+  defp build_mutation(object, args, body), do: build(:mutation, object, args, body)
+
+  defp build(kind, object, args, body) do
     GraphqlBuilder.build(%{
-      kind: :query,
+      kind: kind,
       object: object,
       arguments: args,
       body: body
