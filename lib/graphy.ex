@@ -5,6 +5,23 @@ defmodule Graphy do
     quote do
       require Graphy
       import Graphy
+      @before_compile unquote(__MODULE__)
+    end
+  end
+
+  defmacro __before_compile__(_env) do
+    module = __CALLER__.module
+
+    body = Module.get_attribute(module, :body, [])
+    object = Module.get_attribute(module, :object, [])
+
+    quote do
+      def query do
+        %{
+          object: unquote(object),
+          body: Enum.into(unquote(body), %{})
+        }
+      end
     end
   end
 
@@ -30,11 +47,13 @@ defmodule Graphy do
     end
   end
 
-  defmacro object(_name, _opts \\ [], do: body) do
+  defmacro object(object, _opts \\ [], do: body) do
     body = cleanup(body)
+    module = __CALLER__.module
 
     quote do
-      def query, do: Enum.into(unquote(body), %{})
+      Module.put_attribute(unquote(module), :object, unquote(object))
+      Module.put_attribute(unquote(module), :body, unquote(body))
     end
   end
 

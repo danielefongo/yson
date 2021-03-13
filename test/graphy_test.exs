@@ -19,7 +19,11 @@ defmodule GraphyTest do
   end
 
   test "generate query from structure" do
-    assert Sample.query() == %{
+    query = Sample.query()
+
+    assert query.object == :sample
+
+    assert query.body == %{
              email: nil,
              natural_person: [
                first_name: nil,
