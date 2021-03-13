@@ -1,25 +1,40 @@
 defmodule GraphqlBuilder do
   @moduledoc false
 
-  def build(data) when is_struct(data), do: data |> Map.from_struct() |> build
-  def build(data) when is_map(data), do: inner_build(data, 0) |> Enum.join("\n")
+  def build_arguments(data) when is_map(data), do: inner_build_arguments(data)
 
-  def inner_build(data, indentation) when is_map(data) do
-    inner = data |> Enum.map(fn d -> inner_build(d, indentation + 1) end)
+  defp inner_build_arguments(data) when is_map(data) do
+    inner = data |> Enum.map(fn data -> inner_build_arguments(data) end) |> Enum.join(", ")
+    "(" <> inner <> ")"
+  end
+
+  defp inner_build_arguments({key, value}) when is_atom(value) do
+    "#{camel(key)}: $#{camel(key)}"
+  end
+
+  defp inner_build_arguments({key, value}) when is_map(value) do
+    inner = value |> Enum.map(fn value -> inner_build_arguments(value) end) |> Enum.join(", ")
+    "#{camel(key)}: {" <> inner <> "}"
+  end
+
+  def build_body(data) when is_map(data), do: inner_build_body(data, 0) |> Enum.join("\n")
+
+  def inner_build_body(data, indentation) when is_map(data) do
+    inner = data |> Enum.map(fn d -> inner_build_body(d, indentation + 1) end)
     indent(["{", inner, "}"], indentation)
   end
 
-  def inner_build({key, value}, indentation) when is_nil(value) do
+  def inner_build_body({key, value}, indentation) when is_nil(value) do
     indent([camel(key)], indentation)
   end
 
-  def inner_build({key, value}, indentation) when is_map(value) do
-    inner = value |> Enum.map(fn d -> inner_build(d, indentation) end)
+  def inner_build_body({key, value}, indentation) when is_map(value) do
+    inner = value |> Enum.map(fn d -> inner_build_body(d, indentation) end)
     indent(["#{key} {", inner, "}"], indentation)
   end
 
-  def inner_build({key, value}, indentation) when is_list(value) do
-    inner = value |> Enum.into(%{}) |> Enum.map(fn d -> inner_build(d, indentation) end)
+  def inner_build_body({key, value}, indentation) when is_list(value) do
+    inner = value |> Enum.into(%{}) |> Enum.map(fn d -> inner_build_body(d, indentation) end)
     indent(["... on #{pascal(key)} {", inner, "}"], indentation)
   end
 
