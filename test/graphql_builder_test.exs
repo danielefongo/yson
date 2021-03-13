@@ -45,4 +45,18 @@ defmodule GraphqlBuilderTest do
                "(user: {firstName: $firstName, lastName: $lastName})"
     end
   end
+
+  describe "for query" do
+    test "build empty" do
+      assert GraphqlBuilder.build_query(:people, %{}) == "query people"
+    end
+
+    test "build with root arguments" do
+      assert GraphqlBuilder.build_query(:people, %{first_name: :string, age: :integer}) == "query ($age: Integer, $firstName: String) {\n  people"
+    end
+
+    test "build with nested arguments" do
+      assert GraphqlBuilder.build_query(:people, %{foo: :integer, user: %{first_name: :string}}) == "query ($foo: Integer, $firstName: String) {\n  people"
+    end
+  end
 end
