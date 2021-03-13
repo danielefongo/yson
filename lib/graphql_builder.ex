@@ -35,10 +35,10 @@ defmodule GraphqlBuilder do
     "#{camel(key)}: {" <> inner <> "}"
   end
 
-  def build_body(data) when is_map(data), do: inner_build_body(data, 0) |> Enum.join("\n")
+  def build_body(data) when is_map(data), do: inner_build_body(data, 1) |> Enum.join("\n")
 
   def inner_build_body(data, indentation) when is_map(data) do
-    inner = data |> Enum.map(fn d -> inner_build_body(d, indentation + 1) end)
+    inner = data |> Enum.map(fn d -> inner_build_body(d, indentation) end)
     indent(["{", inner, "}"], indentation)
   end
 
