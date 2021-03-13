@@ -1,4 +1,4 @@
-defmodule Indent do
+defmodule Graphy.Indent do
   @moduledoc false
   @indentation "  "
 

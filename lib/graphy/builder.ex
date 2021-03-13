@@ -1,5 +1,6 @@
-defmodule GraphqlBuilder do
+defmodule Graphy.Builder do
   @moduledoc false
+  alias Graphy.Indent
 
   def build(%{kind: kind, object: object, arguments: arguments, body: body}) do
     Indent.indent([

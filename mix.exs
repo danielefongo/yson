@@ -1,9 +1,9 @@
-defmodule GraphqlBuilder.MixProject do
+defmodule Graphy.Builder.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :graphql_builder,
+      app: :graphy,
       version: "0.1.0",
       elixir: "~> 1.11",
       elixirc_paths: elixirc_paths(Mix.env()),

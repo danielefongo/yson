@@ -1,4 +1,4 @@
-defmodule GraphqlBuilderTest do
+defmodule Graphy.BuilderTest do
   use ExUnit.Case
 
   describe "for inner body" do
@@ -90,7 +90,7 @@ defmodule GraphqlBuilderTest do
   defp build_mutation(object, args, body), do: build(:mutation, object, args, body)
 
   defp build(kind, object, args, body) do
-    GraphqlBuilder.build(%{
+    Graphy.Builder.build(%{
       kind: kind,
       object: object,
       arguments: args,
