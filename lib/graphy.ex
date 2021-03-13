@@ -16,6 +16,7 @@ defmodule Graphy do
 
   defmacro field(name, _opts \\ [], do: body) do
     body = cleanup(body)
+
     quote do
       {unquote(name), Enum.into(unquote(body), %{})}
     end
@@ -23,6 +24,7 @@ defmodule Graphy do
 
   defmacro interface(name, _opts \\ [], do: body) do
     body = cleanup(body)
+
     quote do
       {unquote(name), unquote(body)}
     end
@@ -30,6 +32,7 @@ defmodule Graphy do
 
   defmacro object(_name, _opts \\ [], do: body) do
     body = cleanup(body)
+
     quote do
       def query, do: Enum.into(unquote(body), %{})
     end
@@ -48,5 +51,7 @@ defmodule Graphy do
     end
   end
 
-  defp filter_valid_macros(list), do: Enum.filter(list, fn {func_name, _, _} -> Enum.member?([:field, :interface], func_name) end)
+  defp filter_valid_macros(list),
+    do:
+      Enum.filter(list, fn {func_name, _, _} -> Enum.member?([:field, :interface], func_name) end)
 end

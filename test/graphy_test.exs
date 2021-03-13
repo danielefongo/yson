@@ -5,19 +5,29 @@ defmodule GraphyTest do
     use Graphy
 
     object :sample do
-      field :root do
-        interface :person do
-          field(:name)
-        end
+      field(:email)
+
+      interface :natural_person do
+        field(:first_name)
+        field(:second_name)
+      end
+
+      interface :legal_person do
+        field(:company_name)
       end
     end
   end
 
   test "generate query from structure" do
     assert Sample.query() == %{
-             root: %{
-               person: [name: nil]
-             }
+             email: nil,
+             natural_person: [
+               first_name: nil,
+               second_name: nil
+             ],
+             legal_person: [
+               company_name: nil
+             ]
            }
   end
 end
