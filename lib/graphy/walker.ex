@@ -6,6 +6,7 @@ defmodule Graphy.Walker do
   def walk(resolvers, data) do
     resolvers
     |> Enum.map(fn {key, _} = el -> inner_walk(el, data, [key]) end)
+    |> Enum.filter(fn {_, value} -> not is_nil(value) end)
     |> Enum.into(%{})
   end
 
@@ -13,6 +14,7 @@ defmodule Graphy.Walker do
     inner =
       resolvers
       |> Enum.map(fn {key, _} = el -> inner_walk(el, data, path ++ [key]) end)
+      |> Enum.filter(fn {_, value} -> not is_nil(value) end)
       |> Enum.into(%{})
 
     {field, resolver.(inner)}

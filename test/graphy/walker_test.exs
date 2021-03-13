@@ -77,4 +77,32 @@ defmodule Graphy.WalkerTest do
 
     assert Walker.walk(resolvers, data) == expected_data
   end
+
+  test "walk ignoring missing fields" do
+    resolvers = %{
+      sample:
+        {&Graphy.void_resolver/1,
+         %{
+           company_name: &Graphy.void_resolver/1,
+           name: &Graphy.void_resolver/1,
+           surname: &Graphy.void_resolver/1
+         }}
+    }
+
+    data = %{
+      sample: %{
+        name: "name",
+        surname: "surname"
+      }
+    }
+
+    expected_data = %{
+      sample: %{
+        name: "name",
+        surname: "surname"
+      }
+    }
+
+    assert Walker.walk(resolvers, data) == expected_data
+  end
 end
