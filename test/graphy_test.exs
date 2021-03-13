@@ -108,27 +108,15 @@ defmodule GraphyTest do
              }
     end
 
-    test "interface with default resolver" do
+    test "ignore interfaces" do
       {_, resolvers} =
+      field :foo do
         interface :foo do
           field(:field)
         end
 
-      assert resolvers == {
-               :foo,
-               {
-                 &void_resolver/1,
-                 %{field: &void_resolver/1}
-               }
-             }
-    end
-
-    test "interface with custom resolver" do
-      {_, resolvers} =
-        interface :foo do
-          field(:field)
-          resolver(&echo_resolver/1)
-        end
+        resolver(&echo_resolver/1)
+      end
 
       assert resolvers == {
                :foo,
@@ -147,11 +135,11 @@ defmodule GraphyTest do
         end
 
       assert resolvers == %{
-        foo: {
-          &echo_resolver/1,
-          %{field: &void_resolver/1}
-        }
-      }
+               foo: {
+                 &echo_resolver/1,
+                 %{field: &void_resolver/1}
+               }
+             }
     end
 
     test "object with default resolver" do
@@ -161,11 +149,11 @@ defmodule GraphyTest do
         end
 
       assert resolvers == %{
-        foo: {
-          &void_resolver/1,
-          %{field: &void_resolver/1}
-        }
-      }
+               foo: {
+                 &void_resolver/1,
+                 %{field: &void_resolver/1}
+               }
+             }
     end
   end
 

@@ -101,7 +101,6 @@ defmodule Graphy do
 
   defmacro interface(name, _opts \\ [], do: body) do
     fields = fetch_fields(body)
-    resolver = fetch_resolver(body)
 
     nested_fields = fetch_nested_fields(fields)
     nested_resolvers = fetch_nested_resolvers(fields, true)
@@ -109,7 +108,7 @@ defmodule Graphy do
     quote do
       {
         {unquote(name), unquote(nested_fields)},
-        {unquote(name), {unquote(resolver), unquote(nested_resolvers)}}
+        {unquote(name), unquote(nested_resolvers)}
       }
     end
   end
@@ -151,7 +150,11 @@ defmodule Graphy do
 
   defp fetch_nested_resolvers(fields, to_map \\ false) do
     quote do
-      nested = Enum.map(unquote(fields), fn {_, resolver} -> resolver end)
+      nested = unquote(fields)
+      |> Enum.map(fn {_, resolver} -> resolver end)
+      |> Enum.map(fn {k, inner} -> if is_map(inner), do: Map.to_list(inner), else: {k, inner} end)
+      |> List.flatten()
+
       if unquote(to_map), do: Enum.into(nested, %{}), else: nested
     end
   end
