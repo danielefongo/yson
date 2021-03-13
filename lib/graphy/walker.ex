@@ -1,11 +1,10 @@
 defmodule Graphy.Walker do
   @moduledoc false
-
-  require Logger
+  import Recase
 
   def walk(resolvers, data) do
     resolvers
-    |> Enum.map(fn {key, _} = el -> inner_walk(el, data, [key]) end)
+    |> Enum.map(fn {key, _} = el -> inner_walk(el, data, [to_camel(key)]) end)
     |> Enum.filter(fn {_, value} -> not is_nil(value) end)
     |> Enum.into(%{})
   end
@@ -13,7 +12,7 @@ defmodule Graphy.Walker do
   defp inner_walk({field, {resolver, resolvers}}, data, path) do
     inner =
       resolvers
-      |> Enum.map(fn {key, _} = el -> inner_walk(el, data, path ++ [key]) end)
+      |> Enum.map(fn {key, _} = el -> inner_walk(el, data, path ++ [to_camel(key)]) end)
       |> Enum.filter(fn {_, value} -> not is_nil(value) end)
       |> Enum.into(%{})
 

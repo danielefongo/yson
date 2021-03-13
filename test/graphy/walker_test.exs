@@ -57,6 +57,26 @@ defmodule Graphy.WalkerTest do
     assert Walker.walk(resolvers, data) == expected_data
   end
 
+  test "walk recasing" do
+    resolvers = %{
+      sample: {&Graphy.void_resolver/1, %{full_name: &Graphy.void_resolver/1}}
+    }
+
+    data = %{
+      sample: %{
+        fullName: "name"
+      }
+    }
+
+    expected_data = %{
+      sample: %{
+        full_name: "name"
+      }
+    }
+
+    assert Walker.walk(resolvers, data) == expected_data
+  end
+
   test "walk combining resolvers" do
     resolvers = %{
       sample: {&collapse_name/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
