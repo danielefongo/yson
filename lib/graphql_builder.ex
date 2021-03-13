@@ -1,6 +1,14 @@
 defmodule GraphqlBuilder do
   @moduledoc false
 
+  def build(method, arguments, data) when is_map(data) do
+    query = build_query(arguments)
+    arguments = build_arguments(method, arguments)
+    body = build_body(data)
+    inner = [arguments <> " {"] ++ body ++ ["}"]
+    Indent.indent([query <> " {", inner, "}"])
+  end
+
   def build_query(arguments) do
     inner = inner_build_query(arguments)
 
@@ -42,29 +50,23 @@ defmodule GraphqlBuilder do
     "#{camel(key)}: {" <> inner <> "}"
   end
 
-  def build_body(method, arguments, data) when is_map(data) do
-    query = build_query(arguments)
-    args = build_arguments(method, arguments)
-    inner = inner_build_body(args, data)
-    Indent.indent([query <> " {", inner, "}"])
+  def build_body(data) when is_map(data), do: inner_build_body(data)
+
+  def inner_build_body(data) when is_map(data) do
+    data |> Enum.map(fn d -> inner_build_body(d) end)
   end
 
-  def inner_build_body(prefix, data) when is_map(data) do
-    inner = data |> Enum.map(fn d -> inner_build_body("", d) end)
-    [prefix <> " {"] ++ inner ++ ["}"]
-  end
-
-  def inner_build_body(_prefix, {key, value}) when is_nil(value) do
+  def inner_build_body({key, value}) when is_nil(value) do
     [camel(key)]
   end
 
-  def inner_build_body(prefix, {key, value}) when is_map(value) do
-    inner = value |> Enum.map(fn d -> inner_build_body(prefix, d) end)
+  def inner_build_body({key, value}) when is_map(value) do
+    inner = value |> Enum.map(fn d -> inner_build_body(d) end)
     ["#{key} {"] ++ inner ++ ["}"]
   end
 
-  def inner_build_body(prefix, {key, value}) when is_list(value) do
-    inner = value |> Enum.into(%{}) |> Enum.map(fn d -> inner_build_body(prefix, d) end)
+  def inner_build_body({key, value}) when is_list(value) do
+    inner = value |> Enum.into(%{}) |> Enum.map(fn d -> inner_build_body(d) end)
     ["... on #{pascal(key)} {"] ++ inner ++ ["}"]
   end
 
