@@ -1,10 +1,10 @@
 defmodule GraphqlBuilder do
   @moduledoc false
 
-  def build(method, arguments, data) when is_map(data) do
+  def build(%{kind: _kind, object: object, arguments: arguments, body: body}) do
     query = build_query(arguments)
-    arguments = build_arguments(method, arguments)
-    body = build_body(data)
+    arguments = build_arguments(object, arguments)
+    body = build_body(body)
     inner = [arguments <> " {"] ++ body ++ ["}"]
     Indent.indent([query <> " {", inner, "}"])
   end
