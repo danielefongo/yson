@@ -45,33 +45,28 @@ defmodule GraphqlBuilder do
   def build_body(method, arguments, data) when is_map(data) do
     query = build_query(arguments)
     args = build_arguments(method, arguments)
-    inner = inner_build_body(args, data, 1) |> Enum.join("\n")
-    [query <> " {", inner, "}"] |> Enum.join("\n")
+    inner = inner_build_body(args, data)
+    Indent.indent([query <> " {", inner, "}"])
   end
 
-  def inner_build_body(prefix, data, indentation) when is_map(data) do
-    inner = data |> Enum.map(fn d -> inner_build_body("", d, indentation) end)
-    indent([prefix <> " {", inner, "}"], indentation)
+  def inner_build_body(prefix, data) when is_map(data) do
+    inner = data |> Enum.map(fn d -> inner_build_body("", d) end)
+    [prefix <> " {"] ++ inner ++ ["}"]
   end
 
-  def inner_build_body(_prefix, {key, value}, indentation) when is_nil(value) do
-    indent([camel(key)], indentation)
+  def inner_build_body(_prefix, {key, value}) when is_nil(value) do
+    [camel(key)]
   end
 
-  def inner_build_body(prefix, {key, value}, indentation) when is_map(value) do
-    inner = value |> Enum.map(fn d -> inner_build_body(prefix, d, indentation) end)
-    indent(["#{key} {", inner, "}"], indentation)
+  def inner_build_body(prefix, {key, value}) when is_map(value) do
+    inner = value |> Enum.map(fn d -> inner_build_body(prefix, d) end)
+    ["#{key} {"] ++ inner ++ ["}"]
   end
 
-  def inner_build_body(prefix, {key, value}, indentation) when is_list(value) do
-    inner = value |> Enum.into(%{}) |> Enum.map(fn d -> inner_build_body(prefix, d, indentation) end)
-    indent(["... on #{pascal(key)} {", inner, "}"], indentation)
+  def inner_build_body(prefix, {key, value}) when is_list(value) do
+    inner = value |> Enum.into(%{}) |> Enum.map(fn d -> inner_build_body(prefix, d) end)
+    ["... on #{pascal(key)} {"] ++ inner ++ ["}"]
   end
-
-  defp indent(data, indentation),
-    do: data |> List.flatten() |> Enum.map(fn d -> indent(indentation) <> d end)
-
-  defp indent(indentation), do: String.duplicate("  ", indentation)
 
   defp camel(value), do: value |> Atom.to_string() |> Recase.to_camel()
   defp pascal(value), do: value |> Atom.to_string() |> Recase.to_pascal()

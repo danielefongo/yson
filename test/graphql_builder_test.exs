@@ -42,9 +42,13 @@ defmodule GraphqlBuilderTest do
     end
 
     test "build with nested arguments" do
-      assert GraphqlBuilder.build_body(:people, %{
-               user: %{first_name: :string, last_name: :string}
-             }, %{}) =~
+      assert GraphqlBuilder.build_body(
+               :people,
+               %{
+                 user: %{first_name: :string, last_name: :string}
+               },
+               %{}
+             ) =~
                "people(user: {firstName: $firstName, lastName: $lastName}) {"
     end
   end
@@ -60,7 +64,11 @@ defmodule GraphqlBuilderTest do
     end
 
     test "build with nested arguments" do
-      assert GraphqlBuilder.build_body(:people, %{foo: :integer, user: %{first_name: :string}}, %{}) =~
+      assert GraphqlBuilder.build_body(
+               :people,
+               %{foo: :integer, user: %{first_name: :string}},
+               %{}
+             ) =~
                "query ($foo: Integer, $firstName: String) {"
     end
   end
