@@ -3,37 +3,170 @@ defmodule GraphyTest do
   require Graphy
   import Graphy
 
-  test "single field" do
-    obj = field(:foo)
-    assert obj == {:foo, nil}
-  end
+  def echo_resolver(e), do: e
 
-  test "composite field" do
-    obj =
-      field :foo do
-        field(:foo)
+  defmodule Sample do
+    use Graphy
+
+    query do
+      arg :user do
+        arg(:email, :string)
+        arg(:age, :integer)
+      end
+    end
+
+    object :sample do
+      field :user do
+        field(:email)
+
+        resolver &Sample.user/1
       end
 
-    assert obj == {:foo, %{foo: nil}}
-  end
-
-  test "interface" do
-    obj =
-      interface :foo do
-        field(:foo)
+      interface :natural_person do
+        field(:first_name)
+        field(:second_name)
       end
 
-    assert obj == {:foo, [foo: nil]}
+      interface :legal_person do
+        field(:company_name)
+      end
+    end
+
+    def user(data), do: data
   end
 
-  test "object" do
-    obj =
-      object :foo do
-        field(:one)
-        field(:two)
-      end
+  describe "on body" do
+    test "single field" do
+      {obj, _resolvers} = field(:foo)
+      assert obj == {:foo, nil}
+    end
 
-    assert obj == %{one: nil, two: nil}
+    test "composite field" do
+      {obj, _resolvers} =
+        field :foo do
+          field(:foo)
+          field(:foo2)
+        end
+
+      assert obj == {:foo, %{foo: nil, foo2: nil}}
+    end
+
+    test "interface" do
+      {obj, _resolvers} =
+        interface :foo do
+          field(:foo)
+        end
+
+      assert obj == {:foo, [foo: nil]}
+    end
+
+    test "object" do
+      {obj, _resolver} =
+        object :foo do
+          field(:one)
+          field(:two)
+        end
+
+      assert obj == %{one: nil, two: nil}
+    end
+  end
+
+  describe "on resolvers" do
+    test "single field" do
+      {_, resolvers} = field(:foo)
+      assert resolvers == {:foo, &void_resolver/1}
+    end
+
+    test "composite field with default resolver" do
+      {_, resolvers} =
+        field :foo do
+          field(:field)
+        end
+
+      assert resolvers == {
+               :foo,
+               {
+                 &void_resolver/1,
+                 %{field: &void_resolver/1}
+               }
+             }
+    end
+
+    test "composite field with custom resolver" do
+      {_, resolvers} =
+        field :foo do
+          field(:field)
+          resolver(&echo_resolver/1)
+        end
+
+      assert resolvers == {
+               :foo,
+               {
+                 &echo_resolver/1,
+                 %{field: &void_resolver/1}
+               }
+             }
+    end
+
+    test "interface with default resolver" do
+      {_, resolvers} =
+        interface :foo do
+          field(:field)
+        end
+
+      assert resolvers == {
+               :foo,
+               {
+                 &void_resolver/1,
+                 %{field: &void_resolver/1}
+               }
+             }
+    end
+
+    test "interface with custom resolver" do
+      {_, resolvers} =
+        interface :foo do
+          field(:field)
+          resolver(&echo_resolver/1)
+        end
+
+      assert resolvers == {
+               :foo,
+               {
+                 &echo_resolver/1,
+                 %{field: &void_resolver/1}
+               }
+             }
+    end
+
+    test "object" do
+      {_, resolvers} =
+        object :foo do
+          field(:field)
+          resolver(&echo_resolver/1)
+        end
+
+      assert resolvers == %{
+        foo: {
+          &echo_resolver/1,
+          %{field: &void_resolver/1}
+        }
+      }
+    end
+
+    test "object with default resolver" do
+      {_, resolvers} =
+        object :foo do
+          field(:field)
+        end
+
+      assert resolvers == %{
+        foo: {
+          &void_resolver/1,
+          %{field: &void_resolver/1}
+        }
+      }
+    end
   end
 
   test "single argument" do
@@ -72,32 +205,6 @@ defmodule GraphyTest do
   end
 
   test "generate query" do
-    defmodule Sample do
-      use Graphy
-
-      query do
-        arg :user do
-          arg(:email, :string)
-          arg(:age, :integer)
-        end
-      end
-
-      object :sample do
-        field :user do
-          field(:email)
-        end
-
-        interface :natural_person do
-          field(:first_name)
-          field(:second_name)
-        end
-
-        interface :legal_person do
-          field(:company_name)
-        end
-      end
-    end
-
     description = Sample.describe()
 
     assert description.object == :sample

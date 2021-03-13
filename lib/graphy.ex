@@ -16,6 +16,7 @@ defmodule Graphy do
     object = Module.get_attribute(module, :object)
     arguments = Module.get_attribute(module, :arguments)
     body = Module.get_attribute(module, :body)
+    resolvers = Module.get_attribute(module, :resolvers)
 
     quote do
       def describe do
@@ -26,6 +27,8 @@ defmodule Graphy do
           body: Enum.into(unquote(body), %{})
         }
       end
+
+      def resolvers, do: Enum.into(unquote(resolvers), %{})
     end
   end
 
@@ -36,7 +39,7 @@ defmodule Graphy do
   end
 
   defmacro arg(name, _opts \\ [], do: body) do
-    body = cleanup(body, [:arg])
+    body = fetch_args(body)
 
     quote do
       {unquote(name), Enum.into(unquote(body), %{})}
@@ -44,7 +47,7 @@ defmodule Graphy do
   end
 
   defmacro query(_opts \\ [], do: body) do
-    body = cleanup(body, [:arg])
+    body = fetch_args(body)
     module = __CALLER__.module
 
     Module.put_attribute(module, :kind, :query)
@@ -56,7 +59,7 @@ defmodule Graphy do
   end
 
   defmacro mutation(_opts \\ [], do: body) do
-    body = cleanup(body, [:arg])
+    body = fetch_args(body)
     module = __CALLER__.module
 
     Module.put_attribute(module, :kind, :mutation)
@@ -67,44 +70,109 @@ defmodule Graphy do
     end
   end
 
+  defmacro resolver(fun), do: fun
+
   defmacro field(data) do
+    field = quote do: {unquote(data), nil}
+    resolvers = quote do: {unquote(data), &void_resolver/1}
+
     quote do
-      {unquote(data), nil}
+      {
+        unquote(field),
+        unquote(resolvers)
+      }
     end
   end
 
   defmacro field(name, _opts \\ [], do: body) do
-    body = cleanup(body, [:field, :interface])
+    fields = fetch_fields(body)
+    resolver = fetch_resolver(body)
+
+    nested_fields = fetch_nested_fields(fields, true)
+    nested_resolvers = fetch_nested_resolvers(fields, true)
 
     quote do
-      {unquote(name), Enum.into(unquote(body), %{})}
+      {
+        {unquote(name), unquote(nested_fields)},
+        {unquote(name), {unquote(resolver), unquote(nested_resolvers)}}
+      }
     end
   end
 
   defmacro interface(name, _opts \\ [], do: body) do
-    body = cleanup(body, [:field, :interface])
+    fields = fetch_fields(body)
+    resolver = fetch_resolver(body)
+
+    nested_fields = fetch_nested_fields(fields)
+    nested_resolvers = fetch_nested_resolvers(fields, true)
 
     quote do
-      {unquote(name), unquote(body)}
+      {
+        {unquote(name), unquote(nested_fields)},
+        {unquote(name), {unquote(resolver), unquote(nested_resolvers)}}
+      }
     end
   end
 
   defmacro object(object, _opts \\ [], do: body) do
-    body = cleanup(body, [:field, :interface])
     module = __CALLER__.module
 
+    fields = fetch_fields(body)
+    resolver = fetch_resolver(body)
+
+    nested_fields = fetch_nested_fields(fields, true)
+    nested_resolvers = fetch_nested_resolvers(fields, true)
+
+    resolvers = quote do
+      Map.put(%{}, unquote(object), {unquote(resolver), unquote(nested_resolvers)})
+    end
+
     Module.put_attribute(module, :object, object)
-    Module.put_attribute(module, :body, body)
+    Module.put_attribute(module, :body, nested_fields)
+    Module.put_attribute(module, :resolvers, resolvers)
 
     quote do
-      Enum.into(unquote(body), %{})
+      {
+        unquote(nested_fields),
+        unquote(resolvers)
+      }
     end
   end
 
-  defp cleanup(body, allowed) do
+  defp fetch_resolver(body) do
     body
     |> ast_to_list()
-    |> filter_valid_macros(allowed)
+    |> find_valid_macros([:resolver], &Enum.find/2)
+    |> case do
+      nil -> quote do: &void_resolver/1
+      r -> r
+    end
+  end
+
+  defp fetch_nested_resolvers(fields, to_map \\ false) do
+    quote do
+      nested = Enum.map(unquote(fields), fn {_, resolver} -> resolver end)
+      if unquote(to_map), do: Enum.into(nested, %{}), else: nested
+    end
+  end
+
+  defp fetch_fields(body) do
+    body
+    |> ast_to_list()
+    |> find_valid_macros([:field, :interface], &Enum.filter/2)
+  end
+
+  defp fetch_nested_fields(fields, to_map \\ false) do
+    quote do
+      nested = Enum.map(unquote(fields), fn {field, _} -> field end)
+      if unquote(to_map), do: Enum.into(nested, %{}), else: nested
+    end
+  end
+
+  defp fetch_args(body) do
+    body
+    |> ast_to_list()
+    |> find_valid_macros([:arg], &Enum.filter/2)
   end
 
   defp ast_to_list(body) do
@@ -114,6 +182,8 @@ defmodule Graphy do
     end
   end
 
-  defp filter_valid_macros(list, allowed),
-    do: Enum.filter(list, fn {func_name, _, _} -> Enum.member?(allowed, func_name) end)
+  defp find_valid_macros(list, allowed, method),
+    do: method.(list, fn {func_name, _, _} -> Enum.member?(allowed, func_name) end)
+
+  def void_resolver(data), do: data
 end
