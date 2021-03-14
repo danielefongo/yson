@@ -5,7 +5,7 @@ defmodule Graphy.Builder.MixProject do
     [
       app: :graphy,
       version: "0.1.0",
-      elixir: "~> 1.11",
+      elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),
       aliases: aliases(),
       start_permanent: Mix.env() == :prod,

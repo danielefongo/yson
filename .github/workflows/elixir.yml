@@ -6,7 +6,7 @@ jobs:
   build:
     name: Build and test
     runs-on: ubuntu-latest
-    container: elixir:1.11-alpine
+    container: elixir:1.10-alpine
 
     steps:
     - name: Check out repository code
