@@ -7,6 +7,7 @@ defmodule Graphy.Builder.MixProject do
       version: "0.1.0",
       elixir: "~> 1.11",
       elixirc_paths: elixirc_paths(Mix.env()),
+      aliases: aliases(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
@@ -37,6 +38,22 @@ defmodule Graphy.Builder.MixProject do
       {:credo, "~> 1.4.1", only: [:dev, :test]},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.10", only: :test}
+    ]
+  end
+
+  defp aliases do
+    [
+      "format.all": [
+        "format mix.exs 'lib/**/*.{ex,exs}' 'test/**/*.{ex,exs}' 'config/*.{ex,exs}'"
+      ],
+      "format.check": [
+        "format --check-formatted mix.exs 'lib/**/*.{ex,exs}' 'test/**/*.{ex,exs}' 'config/*.{ex, exs}'"
+      ],
+      check: [
+        "compile --all-warnings --ignore-module-conflict --warnings-as-errors --debug-info",
+        "format.check",
+        "credo"
+      ]
     ]
   end
 

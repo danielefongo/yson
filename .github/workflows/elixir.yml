@@ -1,0 +1,32 @@
+name: ci
+
+on: [push]
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    container: elixir:1.11-alpine
+
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
+
+    - name: Local hex
+      run: mix local.hex --force
+
+    - name: Local rebar
+      run: mix local.rebar --force
+
+    - name: Install dependencies
+      run: mix deps.get
+
+    - name: Run tests
+      run: mix coveralls.post --trace -t $COVERALLS_REPO_TOKEN
+      env:
+        POSTGRES_HOST: postgres
+        POSTGRES_PORT: 5432
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALL_TOKEN }}
+
+    - name: Check
+      run: mix check
