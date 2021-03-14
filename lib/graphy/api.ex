@@ -2,14 +2,14 @@ defmodule Graphy.Api do
   @moduledoc false
   alias Graphy.{Builder, Walker}
 
-  def run(schema, vars, graphql_url) do
+  def run(schema, vars, graphql_url, headers \\ [], options \\ []) do
     body =
       schema.describe()
       |> Builder.build(vars)
       |> Jason.encode!()
 
     graphql_url
-    |> HTTPoison.post(body)
+    |> HTTPoison.post(body, headers, options)
     |> response()
     |> parse_response(schema.resolvers())
   end
