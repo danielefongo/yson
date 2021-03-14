@@ -1,4 +1,6 @@
 defmodule Graphy.MapUtil do
+  @moduledoc false
+
   def subset(map, keys) do
     map
     |> Enum.filter(fn {key, _} -> Enum.member?(keys, key) end)

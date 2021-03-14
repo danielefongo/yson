@@ -3,9 +3,10 @@ defmodule Graphy.Api do
   alias Graphy.{Builder, Walker}
 
   def run(schema, vars, graphql_url) do
-    body = schema.describe()
-    |> Builder.build(vars)
-    |> Jason.encode!()
+    body =
+      schema.describe()
+      |> Builder.build(vars)
+      |> Jason.encode!()
 
     graphql_url
     |> HTTPoison.post(body)

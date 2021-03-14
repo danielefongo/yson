@@ -25,7 +25,8 @@ defmodule Graphy.BuilderTest do
       vars = %{}
       body = %{root: %{nested: nil}}
 
-      assert build_query(@object, args, body, vars).query =~ "{\n    root {\n      nested\n    }\n  }"
+      assert build_query(@object, args, body, vars).query =~
+               "{\n    root {\n      nested\n    }\n  }"
     end
 
     test "build with simple interfaces" do

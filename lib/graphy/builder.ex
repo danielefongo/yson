@@ -5,11 +5,12 @@ defmodule Graphy.Builder do
   def build(%{kind: kind, object: object, arguments: arguments, body: body}, variables) do
     variables = fetch_variables(variables, arguments)
 
-    query = Indent.indent([
-      build_query(arguments, kind) <> " {",
-      [build_arguments(object, arguments) <> " {"] ++ build_body(body) ++ ["}"],
-      "}"
-    ])
+    query =
+      Indent.indent([
+        build_query(arguments, kind) <> " {",
+        [build_arguments(object, arguments) <> " {"] ++ build_body(body) ++ ["}"],
+        "}"
+      ])
 
     %{
       query: query,
