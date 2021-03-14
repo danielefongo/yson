@@ -127,11 +127,13 @@ defmodule Graphy do
         Map.put(%{}, unquote(object), {unquote(resolver), unquote(nested_resolvers)})
       end
 
-    Module.put_attribute(module, :object, object)
-    Module.put_attribute(module, :body, nested_fields)
-    Module.put_attribute(module, :resolvers, resolvers)
-
     quote do
+      if :elixir_module.mode(unquote(module)) == :all do
+        Module.put_attribute(unquote(module), :object, unquote(object))
+        Module.put_attribute(unquote(module), :body, Macro.escape(unquote(nested_fields)))
+        Module.put_attribute(unquote(module), :resolvers, Macro.escape(unquote(resolvers)))
+      end
+
       {
         unquote(nested_fields),
         unquote(resolvers)
