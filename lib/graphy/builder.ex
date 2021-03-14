@@ -1,13 +1,32 @@
 defmodule Graphy.Builder do
   @moduledoc false
-  alias Graphy.Indent
+  alias Graphy.{Indent, MapUtil}
 
-  def build(%{kind: kind, object: object, arguments: arguments, body: body}) do
-    Indent.indent([
+  def build(%{kind: kind, object: object, arguments: arguments, body: body}, variables) do
+    variables = fetch_variables(variables, arguments)
+
+    query = Indent.indent([
       build_query(arguments, kind) <> " {",
       [build_arguments(object, arguments) <> " {"] ++ build_body(body) ++ ["}"],
       "}"
     ])
+
+    %{
+      query: query,
+      variables: variables
+    }
+  end
+
+  defp fetch_variables(variables, arguments) do
+    flat_arguments = MapUtil.flatten(arguments)
+    var_keys = Map.keys(variables)
+    arg_keys = Map.keys(flat_arguments)
+
+    if not MapUtil.has_keys?(variables, arg_keys) do
+      raise "Invalid variables: expected #{inspect(arg_keys)}, actual #{inspect(var_keys)}"
+    end
+
+    MapUtil.subset(variables, arg_keys)
   end
 
   def build_query(arguments, kind) do

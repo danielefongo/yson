@@ -3,12 +3,12 @@ defmodule Graphy.Api do
   alias Graphy.{Builder, Walker}
 
   def run(schema, vars, graphql_url) do
-    query = Builder.build(schema.describe())
-    body = %{query: query, variables: vars}
-    raw_body = Jason.encode!(body)
+    body = schema.describe()
+    |> Builder.build(vars)
+    |> Jason.encode!()
 
     graphql_url
-    |> HTTPoison.post(raw_body)
+    |> HTTPoison.post(body)
     |> response()
     |> parse_response(schema.resolvers())
   end
