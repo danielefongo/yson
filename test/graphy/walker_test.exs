@@ -125,4 +125,75 @@ defmodule Graphy.WalkerTest do
 
     assert Walker.walk(resolvers, data) == expected_data
   end
+
+  test "walk parsing root lists" do
+    resolvers = %{
+      sample:
+        {&Graphy.void_resolver/1,
+         %{
+           name: &Graphy.void_resolver/1,
+           surname: &Graphy.void_resolver/1
+         }}
+    }
+
+    data = %{
+      sample: [
+        %{name: "name", surname: "surname"},
+        %{name: "another_name", surname: "another_surname"}
+      ]
+    }
+
+    expected_data = %{
+      sample: [
+        %{name: "name", surname: "surname"},
+        %{name: "another_name", surname: "another_surname"}
+      ]
+    }
+
+    assert Walker.walk(resolvers, data) == expected_data
+  end
+
+  test "walk parsing nested simple lists" do
+    resolvers = %{
+      sample:
+        {&Graphy.void_resolver/1,
+         %{
+           name: &Graphy.void_resolver/1
+         }}
+    }
+
+    data = %{
+      sample: %{
+        name: ["a", "b"]
+      }
+    }
+
+    assert Walker.walk(resolvers, data) == data
+  end
+
+  test "walk parsing nested complex lists" do
+    resolvers = %{
+      sample:
+        {&Graphy.void_resolver/1,
+         %{
+           users:
+             {&Graphy.void_resolver/1,
+              %{
+                name: &Graphy.void_resolver/1,
+                surname: &Graphy.void_resolver/1
+              }}
+         }}
+    }
+
+    data = %{
+      sample: %{
+        users: [
+          %{name: "name", surname: "surname"},
+          %{name: "another_name", surname: "another_surname"}
+        ]
+      }
+    }
+
+    assert Walker.walk(resolvers, data) == data
+  end
 end

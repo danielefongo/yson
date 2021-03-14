@@ -1,25 +1,24 @@
 defmodule Graphy.Walker do
   @moduledoc false
+  import Enum
   import Recase
 
-  def walk(resolvers, data) do
-    resolvers
-    |> Enum.map(fn {key, _} = el -> inner_walk(el, data, [to_camel(key)]) end)
-    |> Enum.filter(fn {_, value} -> not is_nil(value) end)
-    |> Enum.into(%{})
+  def walk(resolvers, data) when is_map(resolvers) and is_map(data) do
+    data
+    |> map(fn {key, val} -> {to_snake(key), resolvers |> Map.get(to_snake(key)) |> walk(val)} end)
+    |> filter(fn {_, val} -> not is_nil(val) end)
+    |> into(%{})
   end
 
-  defp inner_walk({field, {resolver, resolvers}}, data, path) do
-    inner =
-      resolvers
-      |> Enum.map(fn {key, _} = el -> inner_walk(el, data, path ++ [to_camel(key)]) end)
-      |> Enum.filter(fn {_, value} -> not is_nil(value) end)
-      |> Enum.into(%{})
-
-    {field, resolver.(inner)}
+  def walk({resolver, resolvers}, data) when is_map(data) do
+    data
+    |> map(fn {key, val} -> {to_snake(key), resolvers |> Map.get(to_snake(key)) |> walk(val)} end)
+    |> filter(fn {_, val} -> not is_nil(val) end)
+    |> into(%{})
+    |> resolver.()
   end
 
-  defp inner_walk({field, resolver}, data, path) do
-    {field, resolver.(get_in(data, path))}
-  end
+  def walk(resolver, data) when is_list(data), do: map(data, fn val -> walk(resolver, val) end)
+
+  def walk(resolver, data), do: resolver.(data)
 end
