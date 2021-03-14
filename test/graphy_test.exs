@@ -96,13 +96,13 @@ defmodule GraphyTest do
       {_, resolvers} =
         field :foo do
           field(:field)
-          resolver(&echo_resolver/1)
+          resolver(&Sample.user/1)
         end
 
       assert resolvers == {
                :foo,
                {
-                 &echo_resolver/1,
+                 &Sample.user/1,
                  %{field: &void_resolver/1}
                }
              }
@@ -115,13 +115,13 @@ defmodule GraphyTest do
             field(:field)
           end
 
-          resolver(&echo_resolver/1)
+          resolver(&Sample.user/1)
         end
 
       assert resolvers == {
                :foo,
                {
-                 &echo_resolver/1,
+                 &Sample.user/1,
                  %{field: &void_resolver/1}
                }
              }
@@ -131,12 +131,12 @@ defmodule GraphyTest do
       {_, resolvers} =
         object :foo do
           field(:field)
-          resolver(&echo_resolver/1)
+          resolver(&Sample.user/1)
         end
 
       assert resolvers == %{
                foo: {
-                 &echo_resolver/1,
+                 &Sample.user/1,
                  %{field: &void_resolver/1}
                }
              }
