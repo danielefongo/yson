@@ -213,4 +213,19 @@ defmodule GraphyTest do
              }
            }
   end
+
+  test "generate resolvers" do
+    resolvers = Sample.resolvers()
+
+    assert resolvers == %{
+             sample:
+               {&Graphy.void_resolver/1,
+                %{
+                  company_name: &Graphy.void_resolver/1,
+                  first_name: &Graphy.void_resolver/1,
+                  second_name: &Graphy.void_resolver/1,
+                  user: {&GraphyTest.Sample.user/1, %{email: &Graphy.void_resolver/1}}
+                }}
+           }
+  end
 end
