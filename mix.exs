@@ -26,7 +26,9 @@ defmodule Graphy.Builder.MixProject do
       {:jason, "~> 1.2.2"},
       {:recase, "~> 0.5"},
       {:absinthe, "~> 1.6", only: :test},
-      {:bypass, "~> 2.1.0-rc.0", only: :test}
+      {:bypass, "~> 2.1.0-rc.0", only: :test},
+      {:credo, "~> 1.4.1", only: [:dev, :test]},
+      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
   end
 
