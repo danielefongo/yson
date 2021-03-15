@@ -6,14 +6,12 @@ defmodule Graphy.Parser do
   def parse(resolvers, data) when is_map(resolvers) and is_map(data) do
     data
     |> map(fn {key, val} -> {to_snake(key), resolvers |> Map.get(to_snake(key)) |> parse(val)} end)
-    |> filter(fn {_, val} -> not is_nil(val) end)
     |> into(%{})
   end
 
   def parse({resolver, resolvers}, data) when is_map(data) do
     data
     |> map(fn {key, val} -> {to_snake(key), resolvers |> Map.get(to_snake(key)) |> parse(val)} end)
-    |> filter(fn {_, val} -> not is_nil(val) end)
     |> into(%{})
     |> resolver.()
   end
