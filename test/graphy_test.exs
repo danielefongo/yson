@@ -16,19 +16,19 @@ defmodule GraphyTest do
     end
 
     object :sample do
-      field :user do
-        field(:email)
+      map :user do
+        value(:email)
 
         resolver(&Sample.user/1)
       end
 
       interface :natural_person do
-        field(:first_name)
-        field(:second_name)
+        value(:first_name)
+        value(:second_name)
       end
 
       interface :legal_person do
-        field(:company_name)
+        value(:company_name)
       end
     end
 
@@ -36,16 +36,16 @@ defmodule GraphyTest do
   end
 
   describe "on body" do
-    test "single field" do
-      {obj, _resolvers} = field(:foo)
+    test "value" do
+      {obj, _resolvers} = value(:foo)
       assert obj == {:foo, nil}
     end
 
-    test "composite field" do
+    test "map" do
       {obj, _resolvers} =
-        field :foo do
-          field(:foo)
-          field(:foo2)
+        map :foo do
+          value(:foo)
+          value(:foo2)
         end
 
       assert obj == {:foo, %{foo: nil, foo2: nil}}
@@ -54,7 +54,7 @@ defmodule GraphyTest do
     test "interface" do
       {obj, _resolvers} =
         interface :foo do
-          field(:foo)
+          value(:foo)
         end
 
       assert obj == {:foo, [foo: nil]}
@@ -63,8 +63,8 @@ defmodule GraphyTest do
     test "object" do
       {obj, _resolver} =
         object :foo do
-          field(:one)
-          field(:two)
+          value(:one)
+          value(:two)
         end
 
       assert obj == %{one: nil, two: nil}
@@ -72,15 +72,20 @@ defmodule GraphyTest do
   end
 
   describe "on resolvers" do
-    test "single field" do
-      {_, resolvers} = field(:foo)
+    test "value with default resolver" do
+      {_, resolvers} = value(:foo)
       assert resolvers == {:foo, &void_resolver/1}
     end
 
-    test "composite field with default resolver" do
+    test "value with custom resolver" do
+      {_, resolvers} = value(:foo, &Sample.user/1)
+      assert resolvers == {:foo, &Sample.user/1}
+    end
+
+    test "map with default resolver" do
       {_, resolvers} =
-        field :foo do
-          field(:field)
+        map :foo do
+          value(:field)
         end
 
       assert resolvers == {
@@ -92,10 +97,10 @@ defmodule GraphyTest do
              }
     end
 
-    test "composite field with custom resolver" do
+    test "map with custom resolver" do
       {_, resolvers} =
-        field :foo do
-          field(:field)
+        map :foo do
+          value(:field)
           resolver(&Sample.user/1)
         end
 
@@ -110,9 +115,9 @@ defmodule GraphyTest do
 
     test "ignore interfaces" do
       {_, resolvers} =
-        field :foo do
+        map :foo do
           interface :foo do
-            field(:field)
+            value(:field)
           end
 
           resolver(&Sample.user/1)
@@ -130,7 +135,7 @@ defmodule GraphyTest do
     test "object" do
       {_, resolvers} =
         object :foo do
-          field(:field)
+          value(:field)
           resolver(&Sample.user/1)
         end
 
@@ -145,7 +150,7 @@ defmodule GraphyTest do
     test "object with default resolver" do
       {_, resolvers} =
         object :foo do
-          field(:field)
+          value(:field)
         end
 
       assert resolvers == %{

@@ -72,9 +72,9 @@ defmodule Graphy do
 
   defmacro resolver(fun), do: fun
 
-  defmacro field(data) do
+  defmacro value(data, resolver \\ quote do: &void_resolver/1) do
     field = quote do: {unquote(data), nil}
-    resolvers = quote do: {unquote(data), &void_resolver/1}
+    resolvers = quote do: {unquote(data), unquote(resolver)}
 
     quote do
       {
@@ -84,7 +84,7 @@ defmodule Graphy do
     end
   end
 
-  defmacro field(name, _opts \\ [], do: body) do
+  defmacro map(name, _opts \\ [], do: body) do
     fields = fetch_fields(body)
     resolver = fetch_resolver(body)
 
@@ -168,7 +168,7 @@ defmodule Graphy do
   defp fetch_fields(body) do
     body
     |> ast_to_list()
-    |> find_valid_macros([:field, :interface], &Enum.filter/2)
+    |> find_valid_macros([:value, :map, :interface], &Enum.filter/2)
   end
 
   defp fetch_nested_fields(fields, to_map \\ false) do

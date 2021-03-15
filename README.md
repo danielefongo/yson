@@ -33,16 +33,16 @@ defmodule Person do
   end
 
   object :person do # defines the graphql schema to be queried for
-    field(:email)
+    value(:email)
 
     field :user do
       interface :natural_person do
-        field(:first_name)
-        field(:last_name)
+        value(:first_name)
+        value(:last_name)
       end
 
       interface :legal_person do
-        field(:company_name)
+        value(:company_name)
       end
 
       resolver(&Person.user/1)

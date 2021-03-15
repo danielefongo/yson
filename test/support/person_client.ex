@@ -10,16 +10,16 @@ defmodule Support.PersonClient do
   end
 
   object :sample do
-    field(:email)
+    value(:email)
 
-    field :user do
+    map :user do
       interface :natural_person do
-        field(:first_name)
-        field(:last_name)
+        value(:first_name)
+        value(:last_name)
       end
 
       interface :legal_person do
-        field(:company_name)
+        value(:company_name)
       end
 
       resolver(&PersonClient.user/1)
