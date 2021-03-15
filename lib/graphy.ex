@@ -32,49 +32,29 @@ defmodule Graphy do
     end
   end
 
-  defmacro arg(key, type) when is_atom(type) do
+  defmacro arg(name, type) when is_atom(type) do
     quote do
-      {unquote(key), unquote(type)}
+      {unquote(name), unquote(type)}
     end
   end
 
   defmacro arg(name, _opts \\ [], do: body) do
-    body = fetch_args(body)
+    args = fetch_args(body)
 
     quote do
-      {unquote(name), Enum.into(unquote(body), %{})}
+      {unquote(name), Enum.into(unquote(args), %{})}
     end
   end
 
-  defmacro query(_opts \\ [], do: body) do
-    body = fetch_args(body)
-    module = __CALLER__.module
+  defmacro query(_opts \\ [], do: body), do: request(__CALLER__.module, :query, body)
 
-    Module.put_attribute(module, :kind, :query)
-    Module.put_attribute(module, :arguments, body)
+  defmacro mutation(_opts \\ [], do: body), do: request(__CALLER__.module, :mutation, body)
 
-    quote do
-      Enum.into(unquote(body), %{})
-    end
-  end
+  defmacro resolver(resolver), do: resolver
 
-  defmacro mutation(_opts \\ [], do: body) do
-    body = fetch_args(body)
-    module = __CALLER__.module
-
-    Module.put_attribute(module, :kind, :mutation)
-    Module.put_attribute(module, :arguments, body)
-
-    quote do
-      Enum.into(unquote(body), %{})
-    end
-  end
-
-  defmacro resolver(fun), do: fun
-
-  defmacro value(data, resolver \\ quote do: &void_resolver/1) do
-    field = quote do: {unquote(data), nil}
-    resolvers = quote do: {unquote(data), unquote(resolver)}
+  defmacro value(name, resolver \\ quote(do: &void_resolver/1)) do
+    field = quote do: {unquote(name), nil}
+    resolvers = quote do: {unquote(name), unquote(resolver)}
 
     quote do
       {
@@ -113,7 +93,7 @@ defmodule Graphy do
     end
   end
 
-  defmacro object(object, _opts \\ [], do: body) do
+  defmacro object(object_name, _opts \\ [], do: body) do
     module = __CALLER__.module
 
     fields = fetch_fields(body)
@@ -124,12 +104,12 @@ defmodule Graphy do
 
     resolvers =
       quote do
-        Map.put(%{}, unquote(object), {unquote(resolver), unquote(nested_resolvers)})
+        Map.put(%{}, unquote(object_name), {unquote(resolver), unquote(nested_resolvers)})
       end
 
     quote do
       if :elixir_module.mode(unquote(module)) == :all do
-        Module.put_attribute(unquote(module), :object, unquote(object))
+        Module.put_attribute(unquote(module), :object, unquote(object_name))
         Module.put_attribute(unquote(module), :body, Macro.escape(unquote(nested_fields)))
         Module.put_attribute(unquote(module), :resolvers, Macro.escape(unquote(resolvers)))
       end
@@ -138,6 +118,17 @@ defmodule Graphy do
         unquote(nested_fields),
         unquote(resolvers)
       }
+    end
+  end
+
+  defp request(module, kind, body) do
+    body = fetch_args(body)
+
+    Module.put_attribute(module, :kind, Macro.escape(kind))
+    Module.put_attribute(module, :arguments, body)
+
+    quote do
+      Enum.into(unquote(body), %{})
     end
   end
 
