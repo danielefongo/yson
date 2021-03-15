@@ -1,6 +1,6 @@
 defmodule Graphy.Api do
   @moduledoc false
-  alias Graphy.{Builder, Walker}
+  alias Graphy.{Builder, Parser}
 
   def run(schema, vars, graphql_url, headers \\ [], options \\ []) do
     body =
@@ -37,5 +37,5 @@ defmodule Graphy.Api do
     {:error, errors}
   end
 
-  defp parse_response({:ok, %{data: data}}, resolvers), do: {:ok, Walker.walk(resolvers, data)}
+  defp parse_response({:ok, %{data: data}}, resolvers), do: {:ok, Parser.parse(resolvers, data)}
 end

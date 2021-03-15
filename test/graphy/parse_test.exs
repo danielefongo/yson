@@ -1,11 +1,11 @@
-defmodule Graphy.WalkerTest do
+defmodule Graphy.ParserTest do
   use ExUnit.Case
-  alias Graphy.Walker
+  alias Graphy.Parser
 
   def reverse_text(data), do: String.reverse(data)
   def collapse_name(%{name: name, surname: surname}), do: %{full_name: "#{name} #{surname}"}
 
-  test "walk shallow" do
+  test "parse shallow" do
     resolvers = %{
       sample: {&Graphy.void_resolver/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
     }
@@ -24,10 +24,10 @@ defmodule Graphy.WalkerTest do
       }
     }
 
-    assert Walker.walk(resolvers, data) == expected_data
+    assert Parser.parse(resolvers, data) == expected_data
   end
 
-  test "walk deep" do
+  test "parse deep" do
     resolvers = %{
       sample:
         {&Graphy.void_resolver/1,
@@ -54,10 +54,10 @@ defmodule Graphy.WalkerTest do
       }
     }
 
-    assert Walker.walk(resolvers, data) == expected_data
+    assert Parser.parse(resolvers, data) == expected_data
   end
 
-  test "walk recasing" do
+  test "parse recasing" do
     resolvers = %{
       sample: {&Graphy.void_resolver/1, %{full_name: &Graphy.void_resolver/1}}
     }
@@ -74,10 +74,10 @@ defmodule Graphy.WalkerTest do
       }
     }
 
-    assert Walker.walk(resolvers, data) == expected_data
+    assert Parser.parse(resolvers, data) == expected_data
   end
 
-  test "walk combining resolvers" do
+  test "parse combining resolvers" do
     resolvers = %{
       sample: {&collapse_name/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
     }
@@ -95,10 +95,10 @@ defmodule Graphy.WalkerTest do
       }
     }
 
-    assert Walker.walk(resolvers, data) == expected_data
+    assert Parser.parse(resolvers, data) == expected_data
   end
 
-  test "walk ignoring missing fields" do
+  test "parse ignoring missing fields" do
     resolvers = %{
       sample:
         {&Graphy.void_resolver/1,
@@ -123,10 +123,10 @@ defmodule Graphy.WalkerTest do
       }
     }
 
-    assert Walker.walk(resolvers, data) == expected_data
+    assert Parser.parse(resolvers, data) == expected_data
   end
 
-  test "walk parsing root lists" do
+  test "parse parsing root lists" do
     resolvers = %{
       sample:
         {&Graphy.void_resolver/1,
@@ -150,10 +150,10 @@ defmodule Graphy.WalkerTest do
       ]
     }
 
-    assert Walker.walk(resolvers, data) == expected_data
+    assert Parser.parse(resolvers, data) == expected_data
   end
 
-  test "walk parsing nested simple lists" do
+  test "parse parsing nested simple lists" do
     resolvers = %{
       sample:
         {&Graphy.void_resolver/1,
@@ -168,10 +168,10 @@ defmodule Graphy.WalkerTest do
       }
     }
 
-    assert Walker.walk(resolvers, data) == data
+    assert Parser.parse(resolvers, data) == data
   end
 
-  test "walk parsing nested complex lists" do
+  test "parse parsing nested complex lists" do
     resolvers = %{
       sample:
         {&Graphy.void_resolver/1,
@@ -194,6 +194,6 @@ defmodule Graphy.WalkerTest do
       }
     }
 
-    assert Walker.walk(resolvers, data) == data
+    assert Parser.parse(resolvers, data) == data
   end
 end

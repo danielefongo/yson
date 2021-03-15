@@ -84,7 +84,7 @@ The `Graphy` object exposes two methods:
 - `&describe/0`, to build the object description.
 - `&resolvers/0`, to build the object resolvers tree.
 
-that can be combined with the modules `Graphy.Builder` and `Graphy.Walker`.
+that can be combined with the modules `Graphy.Builder` and `Graphy.Parser`.
 
 ### Create query
 
@@ -98,9 +98,9 @@ iex> %{
 ```
 
 ### Parse response
-`&Graphy.Walker.walk/2` accepts a Graphy resolvers tree and the payload (map with atom keys). A usage can be the following:
+`&Graphy.Parser.parse/2` accepts a Graphy resolvers tree and the payload (map with atom keys). A usage can be the following:
 ```elixir
-iex> Graphy.Walker.walk(Person.resolvers(), payload)
+iex> Graphy.Parser.parse(Person.resolvers(), payload)
 iex> %{
   person: %{
     email: "a@b.c",
