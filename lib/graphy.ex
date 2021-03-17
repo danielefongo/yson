@@ -50,8 +50,6 @@ defmodule Graphy do
 
   defmacro mutation(_opts \\ [], do: body), do: request(__CALLER__.module, :mutation, body)
 
-  defmacro resolver(resolver), do: resolver
-
   defmacro value(name, resolver \\ quote(do: &void_resolver/1)) do
     field = quote do: {unquote(name), nil}
     resolvers = quote do: {unquote(name), unquote(resolver)}
@@ -64,9 +62,9 @@ defmodule Graphy do
     end
   end
 
-  defmacro map(name, _opts \\ [], do: body) do
+  defmacro map(name, opts \\ [], do: body) do
     fields = fetch_fields(body)
-    resolver = fetch_resolver(body)
+    resolver = fetch_resolver(opts)
 
     nested_fields = fetch_nested_fields(fields, true)
     nested_resolvers = fetch_nested_resolvers(fields, true)
@@ -93,11 +91,11 @@ defmodule Graphy do
     end
   end
 
-  defmacro object(object_name, _opts \\ [], do: body) do
+  defmacro object(object_name, opts \\ [], do: body) do
     module = __CALLER__.module
 
     fields = fetch_fields(body)
-    resolver = fetch_resolver(body)
+    resolver = fetch_resolver(opts)
 
     nested_fields = fetch_nested_fields(fields, true)
     nested_resolvers = fetch_nested_resolvers(fields, true)
@@ -132,13 +130,9 @@ defmodule Graphy do
     end
   end
 
-  defp fetch_resolver(body) do
-    body
-    |> ast_to_list()
-    |> find_valid_macros([:resolver], &Enum.find/2)
-    |> case do
-      nil -> quote do: &void_resolver/1
-      r -> r
+  defp fetch_resolver(options) do
+    quote do
+      Keyword.get(unquote(options), :resolver, &void_resolver/1)
     end
   end
 

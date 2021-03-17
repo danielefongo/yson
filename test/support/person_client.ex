@@ -12,7 +12,7 @@ defmodule Support.PersonClient do
   object :sample do
     value(:email)
 
-    map :user do
+    map :user, resolver: &PersonClient.user/1 do
       interface :natural_person do
         value(:first_name)
         value(:last_name)
@@ -21,8 +21,6 @@ defmodule Support.PersonClient do
       interface :legal_person do
         value(:company_name)
       end
-
-      resolver(&PersonClient.user/1)
     end
   end
 

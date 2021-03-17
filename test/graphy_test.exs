@@ -16,10 +16,8 @@ defmodule GraphyTest do
     end
 
     object :sample do
-      map :user do
+      map :user, resolver: &Sample.user/1 do
         value(:email)
-
-        resolver(&Sample.user/1)
       end
 
       interface :natural_person do
@@ -99,9 +97,8 @@ defmodule GraphyTest do
 
     test "map with custom resolver" do
       {_, resolvers} =
-        map :foo do
+        map :foo, resolver: &Sample.user/1 do
           value(:field)
-          resolver(&Sample.user/1)
         end
 
       assert resolvers == {
@@ -115,12 +112,10 @@ defmodule GraphyTest do
 
     test "ignore interfaces" do
       {_, resolvers} =
-        map :foo do
+        map :foo, resolver: &Sample.user/1 do
           interface :foo do
             value(:field)
           end
-
-          resolver(&Sample.user/1)
         end
 
       assert resolvers == {
@@ -134,9 +129,8 @@ defmodule GraphyTest do
 
     test "object" do
       {_, resolvers} =
-        object :foo do
+        object :foo, resolver: &Sample.user/1 do
           value(:field)
-          resolver(&Sample.user/1)
         end
 
       assert resolvers == %{
