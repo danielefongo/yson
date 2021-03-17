@@ -2,6 +2,7 @@ defmodule GraphyTest do
   use ExUnit.Case
   require Graphy
   import Graphy
+  import Function, only: [identity: 1]
 
   def echo_resolver(e), do: e
 
@@ -72,7 +73,7 @@ defmodule GraphyTest do
   describe "on resolvers" do
     test "value with default resolver" do
       {_, resolvers} = value(:foo)
-      assert resolvers == {:foo, &void_resolver/1}
+      assert resolvers == {:foo, &identity/1}
     end
 
     test "value with custom resolver" do
@@ -89,8 +90,8 @@ defmodule GraphyTest do
       assert resolvers == {
                :foo,
                {
-                 &void_resolver/1,
-                 %{field: &void_resolver/1}
+                 &identity/1,
+                 %{field: &identity/1}
                }
              }
     end
@@ -105,7 +106,7 @@ defmodule GraphyTest do
                :foo,
                {
                  &Sample.user/1,
-                 %{field: &void_resolver/1}
+                 %{field: &identity/1}
                }
              }
     end
@@ -122,7 +123,7 @@ defmodule GraphyTest do
                :foo,
                {
                  &Sample.user/1,
-                 %{field: &void_resolver/1}
+                 %{field: &identity/1}
                }
              }
     end
@@ -136,7 +137,7 @@ defmodule GraphyTest do
       assert resolvers == %{
                foo: {
                  &Sample.user/1,
-                 %{field: &void_resolver/1}
+                 %{field: &identity/1}
                }
              }
     end
@@ -149,8 +150,8 @@ defmodule GraphyTest do
 
       assert resolvers == %{
                foo: {
-                 &void_resolver/1,
-                 %{field: &void_resolver/1}
+                 &identity/1,
+                 %{field: &identity/1}
                }
              }
     end
@@ -218,12 +219,12 @@ defmodule GraphyTest do
 
     assert resolvers == %{
              sample:
-               {&Graphy.void_resolver/1,
+               {&identity/1,
                 %{
-                  company_name: &Graphy.void_resolver/1,
-                  first_name: &Graphy.void_resolver/1,
-                  second_name: &Graphy.void_resolver/1,
-                  user: {&GraphyTest.Sample.user/1, %{email: &Graphy.void_resolver/1}}
+                  company_name: &identity/1,
+                  first_name: &identity/1,
+                  second_name: &identity/1,
+                  user: {&GraphyTest.Sample.user/1, %{email: &identity/1}}
                 }}
            }
   end

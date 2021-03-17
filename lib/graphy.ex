@@ -1,5 +1,6 @@
 defmodule Graphy do
   @moduledoc false
+  import Function, only: [identity: 1]
 
   defmacro __using__(_) do
     quote do
@@ -50,7 +51,7 @@ defmodule Graphy do
 
   defmacro mutation(_opts \\ [], do: body), do: request(__CALLER__.module, :mutation, body)
 
-  defmacro value(name, resolver \\ quote(do: &void_resolver/1)) do
+  defmacro value(name, resolver \\ quote(do: &identity/1)) do
     field = quote do: {unquote(name), nil}
     resolvers = quote do: {unquote(name), unquote(resolver)}
 
@@ -132,7 +133,7 @@ defmodule Graphy do
 
   defp fetch_resolver(options) do
     quote do
-      Keyword.get(unquote(options), :resolver, &void_resolver/1)
+      Keyword.get(unquote(options), :resolver, &identity/1)
     end
   end
 
@@ -178,6 +179,4 @@ defmodule Graphy do
 
   defp find_valid_macros(list, allowed, method),
     do: method.(list, fn {func_name, _, _} -> Enum.member?(allowed, func_name) end)
-
-  def void_resolver(data), do: data
 end

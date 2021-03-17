@@ -1,13 +1,14 @@
 defmodule Graphy.ParserTest do
   use ExUnit.Case
   alias Graphy.Parser
+  import Function, only: [identity: 1]
 
   def reverse_text(data), do: String.reverse(data)
   def collapse_name(%{name: name, surname: surname}), do: %{full_name: "#{name} #{surname}"}
 
   test "parse shallow" do
     resolvers = %{
-      sample: {&Graphy.void_resolver/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
+      sample: {&identity/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
     }
 
     data = %{
@@ -30,9 +31,9 @@ defmodule Graphy.ParserTest do
   test "parse deep" do
     resolvers = %{
       sample:
-        {&Graphy.void_resolver/1,
+        {&identity/1,
          %{
-           user: {&Graphy.void_resolver/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
+           user: {&identity/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
          }}
     }
 
@@ -59,7 +60,7 @@ defmodule Graphy.ParserTest do
 
   test "parse recasing" do
     resolvers = %{
-      sample: {&Graphy.void_resolver/1, %{full_name: &Graphy.void_resolver/1}}
+      sample: {&identity/1, %{full_name: &identity/1}}
     }
 
     data = %{
@@ -101,11 +102,11 @@ defmodule Graphy.ParserTest do
   test "parse ignoring missing fields" do
     resolvers = %{
       sample:
-        {&Graphy.void_resolver/1,
+        {&identity/1,
          %{
-           company_name: &Graphy.void_resolver/1,
-           name: &Graphy.void_resolver/1,
-           surname: &Graphy.void_resolver/1
+           company_name: &identity/1,
+           name: &identity/1,
+           surname: &identity/1
          }}
     }
 
@@ -129,10 +130,10 @@ defmodule Graphy.ParserTest do
   test "parse parsing root lists" do
     resolvers = %{
       sample:
-        {&Graphy.void_resolver/1,
+        {&identity/1,
          %{
-           name: &Graphy.void_resolver/1,
-           surname: &Graphy.void_resolver/1
+           name: &identity/1,
+           surname: &identity/1
          }}
     }
 
@@ -156,9 +157,9 @@ defmodule Graphy.ParserTest do
   test "parse parsing nested simple lists" do
     resolvers = %{
       sample:
-        {&Graphy.void_resolver/1,
+        {&identity/1,
          %{
-           name: &Graphy.void_resolver/1
+           name: &identity/1
          }}
     }
 
@@ -174,13 +175,13 @@ defmodule Graphy.ParserTest do
   test "parse parsing nested complex lists" do
     resolvers = %{
       sample:
-        {&Graphy.void_resolver/1,
+        {&identity/1,
          %{
            users:
-             {&Graphy.void_resolver/1,
+             {&identity/1,
               %{
-                name: &Graphy.void_resolver/1,
-                surname: &Graphy.void_resolver/1
+                name: &identity/1,
+                surname: &identity/1
               }}
          }}
     }
