@@ -26,7 +26,7 @@ First create a `Graphy` object:
 defmodule Person do
   use Graphy
 
-  query do # runs a query
+  query :person do # runs a query
     arg :user do
       arg(:fiscal_id, :string)
     end
@@ -35,18 +35,20 @@ defmodule Person do
   object :person do # defines the graphql schema to be queried for
     value(:email)
 
-    field :user do
+    map :user, resolver: &Person.user/1 do
       interface :natural_person do
         value(:first_name)
         value(:last_name)
       end
 
-      interface :legal_person do
-        value(:company_name)
-      end
+      ref(:legal_person, :legal_person)
 
-      resolver(&Person.user/1)
+      resolver()
     end
+  end
+
+  interface :legal_person do
+    value(:company_name)
   end
 
   def user(%{company_name: name}), do: %{full_name: name}

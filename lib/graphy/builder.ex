@@ -8,7 +8,7 @@ defmodule Graphy.Builder do
     query =
       Indent.indent([
         build_query(arguments, kind) <> " {",
-        [build_arguments(object, arguments) <> " {"] ++ build_body(body) ++ ["}"],
+        [build_arguments(object, arguments) <> " {"] ++ build_body(body[object]) ++ ["}"],
         "}"
       ])
 

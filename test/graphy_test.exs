@@ -9,7 +9,7 @@ defmodule GraphyTest do
   defmodule Sample do
     use Graphy
 
-    query do
+    query :sample do
       arg :user do
         arg(:email, :string)
         arg(:age, :integer)
@@ -17,143 +17,175 @@ defmodule GraphyTest do
     end
 
     object :sample do
-      map :user, resolver: &Sample.user/1 do
-        value(:email)
-      end
-
-      interface :natural_person do
-        value(:first_name)
-        value(:second_name)
-      end
+      ref(:user, :user)
+      ref(:natural_person, :natural_person)
 
       interface :legal_person do
         value(:company_name)
       end
+
+      map :data do
+        value(:some_data)
+      end
+    end
+
+    map :user, resolver: &Sample.user/1 do
+      value(:email)
+    end
+
+    interface :natural_person do
+      value(:first_name)
+      value(:second_name)
     end
 
     def user(data), do: data
   end
 
   describe "on body" do
-    test "value" do
-      {obj, _resolvers} = value(:foo)
-      assert obj == {:foo, nil}
+    test "value with default resolver" do
+      data = value(:foo)
+      assert data == [:field, :foo, &Function.identity/1]
     end
 
-    test "map" do
-      {obj, _resolvers} =
+    test "value with custom resolver" do
+      data = value(:foo, &Sample.user/1)
+      assert data == [:field, :foo, &Sample.user/1]
+    end
+
+    test "reference" do
+      data = ref(:foo, :another)
+      assert data == [:ref, :foo, :another]
+    end
+
+    test "map with default resolver" do
+      data =
         map :foo do
           value(:foo)
           value(:foo2)
         end
 
-      assert obj == {:foo, %{foo: nil, foo2: nil}}
+      assert data == [
+               :map,
+               false,
+               :foo,
+               &Function.identity/1,
+               [
+                 [:field, :foo, &Function.identity/1],
+                 [:field, :foo2, &Function.identity/1]
+               ]
+             ]
+    end
+
+    test "map with custom resolver" do
+      data =
+        map :foo, resolver: &Sample.user/1 do
+          value(:foo)
+        end
+
+      assert data == [
+               :map,
+               false,
+               :foo,
+               &Sample.user/1,
+               [
+                 [:field, :foo, &Function.identity/1]
+               ]
+             ]
+    end
+
+    test "nested map" do
+      data =
+        nested_map :foo do
+          value(:foo)
+          value(:foo2)
+        end
+
+      assert data == [
+               :map,
+               true,
+               :foo,
+               &Function.identity/1,
+               [
+                 [:field, :foo, &Function.identity/1],
+                 [:field, :foo2, &Function.identity/1]
+               ]
+             ]
     end
 
     test "interface" do
-      {obj, _resolvers} =
+      data =
         interface :foo do
           value(:foo)
         end
 
-      assert obj == {:foo, [foo: nil]}
+      assert data == [
+               :interface,
+               false,
+               :foo,
+               &Function.identity/1,
+               [
+                 [:field, :foo, &Function.identity/1]
+               ]
+             ]
     end
 
-    test "object" do
-      {obj, _resolver} =
+    test "nested interface" do
+      data =
+        nested_interface :foo do
+          value(:foo)
+        end
+
+      assert data == [
+               :interface,
+               true,
+               :foo,
+               &Function.identity/1,
+               [
+                 [:field, :foo, &Function.identity/1]
+               ]
+             ]
+    end
+
+    test "object with default resolver" do
+      data =
         object :foo do
           value(:one)
           value(:two)
         end
 
-      assert obj == %{one: nil, two: nil}
-    end
-  end
-
-  describe "on resolvers" do
-    test "value with default resolver" do
-      {_, resolvers} = value(:foo)
-      assert resolvers == {:foo, &identity/1}
-    end
-
-    test "value with custom resolver" do
-      {_, resolvers} = value(:foo, &Sample.user/1)
-      assert resolvers == {:foo, &Sample.user/1}
+      assert data == [
+               :map,
+               false,
+               :foo,
+               &Function.identity/1,
+               [[:field, :one, &Function.identity/1], [:field, :two, &Function.identity/1]]
+             ]
     end
 
-    test "map with default resolver" do
-      {_, resolvers} =
-        map :foo do
-          value(:field)
+    test "object with custom resolver" do
+      data =
+        object :foo, resolver: &Sample.user/1 do
+          value(:one)
         end
 
-      assert resolvers == {
-               :foo,
-               {
-                 &identity/1,
-                 %{field: &identity/1}
-               }
-             }
+      assert data == [:map, false, :foo, &Sample.user/1, [[:field, :one, &Function.identity/1]]]
     end
 
-    test "map with custom resolver" do
-      {_, resolvers} =
-        map :foo, resolver: &Sample.user/1 do
-          value(:field)
-        end
-
-      assert resolvers == {
-               :foo,
-               {
-                 &Sample.user/1,
-                 %{field: &identity/1}
-               }
-             }
-    end
-
-    test "ignore interfaces" do
-      {_, resolvers} =
-        map :foo, resolver: &Sample.user/1 do
-          interface :foo do
-            value(:field)
+    test "object with nested map" do
+      data =
+        object :foo do
+          map :bar do
+            value(:baz)
           end
         end
 
-      assert resolvers == {
+      assert data == [
+               :map,
+               false,
                :foo,
-               {
-                 &Sample.user/1,
-                 %{field: &identity/1}
-               }
-             }
-    end
-
-    test "object" do
-      {_, resolvers} =
-        object :foo, resolver: &Sample.user/1 do
-          value(:field)
-        end
-
-      assert resolvers == %{
-               foo: {
-                 &Sample.user/1,
-                 %{field: &identity/1}
-               }
-             }
-    end
-
-    test "object with default resolver" do
-      {_, resolvers} =
-        object :foo do
-          value(:field)
-        end
-
-      assert resolvers == %{
-               foo: {
-                 &identity/1,
-                 %{field: &identity/1}
-               }
-             }
+               &Function.identity/1,
+               [[:map, true, :bar, &Function.identity/1, [[:field, :baz, &Function.identity/1]]]]
+             ]
     end
   end
 
@@ -174,7 +206,7 @@ defmodule GraphyTest do
 
   test "query" do
     obj =
-      query do
+      query :sample do
         arg(:one, :string)
         arg(:two, :integer)
       end
@@ -184,7 +216,7 @@ defmodule GraphyTest do
 
   test "mutation" do
     obj =
-      mutation do
+      mutation :sample do
         arg(:one, :string)
         arg(:two, :integer)
       end
@@ -192,18 +224,21 @@ defmodule GraphyTest do
     assert obj == %{one: :string, two: :integer}
   end
 
-  test "generate query" do
+  test "generate description" do
     description = Sample.describe()
 
     assert description.object == :sample
 
     assert description.body == %{
-             user: %{email: nil},
-             natural_person: [
-               first_name: nil,
-               second_name: nil
-             ],
-             legal_person: [company_name: nil]
+             sample: %{
+               user: %{email: nil},
+               data: %{some_data: nil},
+               natural_person: [
+                 first_name: nil,
+                 second_name: nil
+               ],
+               legal_person: [company_name: nil]
+             }
            }
 
     assert description.arguments == %{
@@ -215,16 +250,15 @@ defmodule GraphyTest do
   end
 
   test "generate resolvers" do
-    resolvers = Sample.resolvers()
-
-    assert resolvers == %{
+    assert Sample.resolvers() == %{
              sample:
                {&identity/1,
                 %{
                   company_name: &identity/1,
                   first_name: &identity/1,
                   second_name: &identity/1,
-                  user: {&GraphyTest.Sample.user/1, %{email: &identity/1}}
+                  user: {&GraphyTest.Sample.user/1, %{email: &identity/1}},
+                  data: {&identity/1, %{some_data: &identity/1}}
                 }}
            }
   end

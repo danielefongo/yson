@@ -15,9 +15,9 @@ defmodule Graphy do
 
     kind = Module.get_attribute(module, :kind)
     object = Module.get_attribute(module, :object)
+    objects = Module.get_attribute(module, :objects)
+    references = Module.get_attribute(module, :references)
     arguments = Module.get_attribute(module, :arguments)
-    body = Module.get_attribute(module, :body)
-    resolvers = Module.get_attribute(module, :resolvers)
 
     quote do
       def describe do
@@ -25,11 +25,66 @@ defmodule Graphy do
           kind: unquote(kind),
           object: unquote(object),
           arguments: Enum.into(unquote(arguments), %{}),
-          body: Enum.into(unquote(body), %{})
+          body: body()
         }
       end
 
-      def resolvers, do: Enum.into(unquote(resolvers), %{})
+      def body do
+        Enum.reduce(unquote(objects), %{}, fn {_, val} = node, map -> build_body(val, map) end)
+      end
+
+      def resolvers do
+        Enum.reduce(unquote(objects), %{}, fn {_, val} = node, map ->
+          build_resolvers(val, map)
+        end)
+      end
+
+      defp build_body([:map, nested, name, _resolver, list], map) when is_list(list) do
+        inner_map = Enum.reduce(list, build_map(map, nested), &build_body/2)
+        Map.put(map, name, inner_map)
+      end
+
+      defp build_body([:interface, nested, name, _resolver, list], map) when is_list(list) do
+        inner_keywords =
+          list
+          |> Enum.reduce(build_map(map, nested), &build_body/2)
+          |> Enum.to_list()
+
+        Map.put(map, name, inner_keywords)
+      end
+
+      defp build_body([:field, atom, _resolver], map), do: Map.put(map, atom, nil)
+
+      defp build_body([:ref, atom, ref], map) do
+        unquote(references)
+        |> Keyword.get(ref)
+        |> build_body(%{})
+        |> Map.merge(map)
+      end
+
+      defp build_resolvers([:map, nested, name, resolver, list], map) when is_list(list) do
+        inner_resolvers = Enum.reduce(list, build_map(map, nested), &build_resolvers/2)
+        Map.put(map, name, {resolver, inner_resolvers})
+      end
+
+      defp build_resolvers([:interface, nested, name, resolver, list], map) when is_list(list) do
+        list
+        |> Enum.reduce(build_map(map, nested), &build_resolvers/2)
+        |> Map.merge(map)
+      end
+
+      defp build_resolvers([:field, atom, resolver], map) do
+        Map.put(map, atom, resolver)
+      end
+
+      defp build_resolvers([:ref, atom, ref], map) do
+        unquote(references)
+        |> Keyword.get(ref)
+        |> build_resolvers(%{})
+        |> Map.merge(map)
+      end
+
+      defp build_map(map, nested), do: if(nested, do: %{}, else: map)
     end
   end
 
@@ -47,84 +102,73 @@ defmodule Graphy do
     end
   end
 
-  defmacro query(_opts \\ [], do: body), do: request(__CALLER__.module, :query, body)
+  defmacro query(name, _opts \\ [], do: body),
+    do: request(__CALLER__.module, name, :query, body)
 
-  defmacro mutation(_opts \\ [], do: body), do: request(__CALLER__.module, :mutation, body)
+  defmacro mutation(name, _opts \\ [], do: body),
+    do: request(__CALLER__.module, name, :mutation, body)
 
-  defmacro value(name, resolver \\ quote(do: &identity/1)) do
-    field = quote do: {unquote(name), nil}
-    resolvers = quote do: {unquote(name), unquote(resolver)}
+  defmacro value(name, resolver \\ quote(do: &identity/1)), do: [:field, name, resolver]
 
-    quote do
-      {
-        unquote(field),
-        unquote(resolvers)
-      }
-    end
-  end
+  defmacro ref(name, reference), do: [:ref, name, reference]
 
   defmacro map(name, opts \\ [], do: body) do
     fields = fetch_fields(body)
     resolver = fetch_resolver(opts)
 
-    nested_fields = fetch_nested_fields(fields, true)
-    nested_resolvers = fetch_nested_resolvers(fields, true)
+    node = quote do: [:map, false, unquote(name), unquote(resolver), unquote(fields)]
 
-    quote do
-      {
-        {unquote(name), unquote(nested_fields)},
-        {unquote(name), {unquote(resolver), unquote(nested_resolvers)}}
-      }
-    end
+    update_attributes(:references, name, node)
+  end
+
+  defmacro nested_map(name, opts \\ [], do: body) do
+    fields = fetch_fields(body)
+    resolver = fetch_resolver(opts)
+
+    [:map, true, name, resolver, fields]
   end
 
   defmacro interface(name, _opts \\ [], do: body) do
     fields = fetch_fields(body)
 
-    nested_fields = fetch_nested_fields(fields)
-    nested_resolvers = fetch_nested_resolvers(fields, true)
+    node = quote do: [:interface, false, unquote(name), &identity/1, unquote(fields)]
 
-    quote do
-      {
-        {unquote(name), unquote(nested_fields)},
-        {unquote(name), unquote(nested_resolvers)}
-      }
-    end
+    update_attributes(:references, name, node)
   end
 
-  defmacro object(object_name, opts \\ [], do: body) do
-    module = __CALLER__.module
+  defmacro nested_interface(name, _opts \\ [], do: body) do
+    fields = fetch_fields(body)
 
+    [:interface, true, name, &identity/1, fields]
+  end
+
+  defmacro object(name, opts \\ [], do: body) do
     fields = fetch_fields(body)
     resolver = fetch_resolver(opts)
 
-    nested_fields = fetch_nested_fields(fields, true)
-    nested_resolvers = fetch_nested_resolvers(fields, true)
+    node = quote do: [:map, false, unquote(name), unquote(resolver), unquote(fields)]
 
-    resolvers =
-      quote do
-        Map.put(%{}, unquote(object_name), {unquote(resolver), unquote(nested_resolvers)})
-      end
+    update_attributes(:objects, name, node)
+  end
 
+  defp update_attributes(category, name, keywords, update \\ true) do
     quote do
-      if :elixir_module.mode(unquote(module)) == :all do
-        Module.put_attribute(unquote(module), :object, unquote(object_name))
-        Module.put_attribute(unquote(module), :body, Macro.escape(unquote(nested_fields)))
-        Module.put_attribute(unquote(module), :resolvers, Macro.escape(unquote(resolvers)))
+      if :elixir_module.mode(__MODULE__) == :all and unquote(update) do
+        data = Module.get_attribute(__MODULE__, unquote(category), [])
+        data = Keyword.put(data, unquote(name), unquote(keywords))
+        Module.put_attribute(__MODULE__, unquote(category), data)
       end
 
-      {
-        unquote(nested_fields),
-        unquote(resolvers)
-      }
+      unquote(keywords)
     end
   end
 
-  defp request(module, kind, body) do
+  defp request(module, name, kind, body) do
     body = fetch_args(body)
 
     Module.put_attribute(module, :kind, Macro.escape(kind))
     Module.put_attribute(module, :arguments, body)
+    Module.put_attribute(module, :object, name)
 
     quote do
       Enum.into(unquote(body), %{})
@@ -137,37 +181,17 @@ defmodule Graphy do
     end
   end
 
-  defp fetch_nested_resolvers(fields, to_map \\ false) do
-    quote do
-      nested =
-        unquote(fields)
-        |> Enum.map(fn {_, resolver} -> resolver end)
-        |> Enum.map(fn {k, inner} ->
-          if is_map(inner), do: Map.to_list(inner), else: {k, inner}
-        end)
-        |> List.flatten()
-
-      if unquote(to_map), do: Enum.into(nested, %{}), else: nested
-    end
-  end
-
   defp fetch_fields(body) do
     body
     |> ast_to_list()
-    |> find_valid_macros([:value, :map, :interface], &Enum.filter/2)
-  end
-
-  defp fetch_nested_fields(fields, to_map \\ false) do
-    quote do
-      nested = Enum.map(unquote(fields), fn {field, _} -> field end)
-      if unquote(to_map), do: Enum.into(nested, %{}), else: nested
-    end
+    |> find_valid_macros([:value, :ref, :map, :interface])
+    |> transform(%{map: :nested_map, interface: :nested_interface})
   end
 
   defp fetch_args(body) do
     body
     |> ast_to_list()
-    |> find_valid_macros([:arg], &Enum.filter/2)
+    |> find_valid_macros([:arg])
   end
 
   defp ast_to_list(body) do
@@ -177,6 +201,13 @@ defmodule Graphy do
     end
   end
 
-  defp find_valid_macros(list, allowed, method),
-    do: method.(list, fn {func_name, _, _} -> Enum.member?(allowed, func_name) end)
+  defp find_valid_macros(list, allowed),
+    do: Enum.filter(list, fn {marker, _, _} -> Enum.member?(allowed, marker) end)
+
+  defp transform(list, mapping),
+    do:
+      Enum.map(list, fn {marker, metadata, children} ->
+        new_marker = Map.get(mapping, marker, marker)
+        {new_marker, metadata, children}
+      end)
 end
