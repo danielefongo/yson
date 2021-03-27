@@ -37,20 +37,21 @@ defmodule Yson.Macro.MapTest do
 
     test "map returns custom resolver on payload" do
       {_, data} =
-        map :foo, resolver: &echo_resolver/1 do
+        map :foo, resolver: &Support.Macro.echo_resolver/1 do
           value(:foo)
         end
 
       [_, resolver, _] = data
 
-      assert resolver == (&echo_resolver/1)
+      assert resolver == (&Support.Macro.echo_resolver/1)
     end
   end
 
   test "map insert description to map" do
     value = {Value, [:foo, &Function.identity/1]}
 
-    description = Map.describe([:a_map, &echo_resolver/1, [value]], %{data: :any}, %{})
+    description =
+      Map.describe([:a_map, &Support.Macro.echo_resolver/1, [value]], %{data: :any}, %{})
 
     assert description == %{data: :any, a_map: %{foo: nil}}
   end
@@ -58,8 +59,11 @@ defmodule Yson.Macro.MapTest do
   test "map insert its resolver and nested resolvers to map" do
     value = {Value, [:foo, &Function.identity/1]}
 
-    resolver = Map.resolver([:a_map, &echo_resolver/1, [value]], %{data: :any}, %{})
+    resolver = Map.resolver([:a_map, &Support.Macro.echo_resolver/1, [value]], %{data: :any}, %{})
 
-    assert resolver == %{data: :any, a_map: {&echo_resolver/1, %{foo: &Function.identity/1}}}
+    assert resolver == %{
+             data: :any,
+             a_map: {&Support.Macro.echo_resolver/1, %{foo: &Function.identity/1}}
+           }
   end
 end

@@ -14,10 +14,10 @@ defmodule Yson.Macro.ValueTest do
     end
 
     test "value returns valid payload with custom resolver" do
-      {module, data} = value(:foo, &echo_resolver/1)
+      {module, data} = value(:foo, &Support.Macro.echo_resolver/1)
 
       assert module == Value
-      assert data == [:foo, &echo_resolver/1]
+      assert data == [:foo, &Support.Macro.echo_resolver/1]
     end
   end
 
