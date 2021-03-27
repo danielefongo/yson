@@ -1,5 +1,6 @@
 defmodule Graphy.Macro.MapTest do
   use ExUnit.Case
+  alias Graphy.Macro.{Map, Value}
   use Graphy.Macro.Map
   use Graphy.Macro.Value
 
@@ -13,10 +14,9 @@ defmodule Graphy.Macro.MapTest do
           value(:foo2)
         end
 
-      [nested, name, resolver, _] = data
+      [name, resolver, _] = data
 
       assert module == Map
-      assert nested == false
       assert name == :foo
       assert resolver == (&Function.identity/1)
     end
@@ -28,10 +28,9 @@ defmodule Graphy.Macro.MapTest do
           value(:foo2)
         end
 
-      [nested, name, resolver, _] = data
+      [name, resolver, _] = data
 
       assert module == Map
-      assert nested == true
       assert name == :foo
       assert resolver == (&Function.identity/1)
     end
@@ -42,9 +41,25 @@ defmodule Graphy.Macro.MapTest do
           value(:foo)
         end
 
-      [_, _, resolver, _] = data
+      [_, resolver, _] = data
 
       assert resolver == (&echo_resolver/1)
     end
+  end
+
+  test "map insert description to map" do
+    value = {Value, [:foo, &Function.identity/1]}
+
+    description = Map.describe([:a_map, &echo_resolver/1, [value]], %{data: :any}, %{})
+
+    assert description == %{data: :any, a_map: %{foo: nil}}
+  end
+
+  test "map insert its resolver and nested resolvers to map" do
+    value = {Value, [:foo, &Function.identity/1]}
+
+    description = Map.resolver([:a_map, &echo_resolver/1, [value]], %{data: :any}, %{})
+
+    assert description == %{data: :any, a_map: {&echo_resolver/1, %{foo: &Function.identity/1}}}
   end
 end

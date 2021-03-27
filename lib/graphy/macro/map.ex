@@ -15,7 +15,7 @@ defmodule Graphy.Macro.Map do
         fields = fetch(body, @allowed_macros, @mapping)
         resolver = Keyword.get(opts, :resolver, &identity/1)
 
-        node = quote do: {Map, [false, unquote(name), unquote(resolver), unquote(fields)]}
+        node = quote do: {Map, [unquote(name), unquote(resolver), unquote(fields)]}
 
         update_attributes(:references, name, node)
       end
@@ -24,28 +24,22 @@ defmodule Graphy.Macro.Map do
         fields = fetch(body, @allowed_macros, @mapping)
         resolver = Keyword.get(opts, :resolver, &identity/1)
 
-        {Map, [true, name, resolver, fields]}
+        {Map, [name, resolver, fields]}
       end
     end
   end
 
-  def describe([nested, name, _resolver, list], map, references) do
+  def describe([name, _resolver, list], map, references) do
     inner_map =
-      Enum.reduce(list, build_map(map, nested), fn {module, value}, m ->
-        module.describe(value, m, references)
-      end)
+      Enum.reduce(list, %{}, fn {module, value}, m -> module.describe(value, m, references) end)
 
     Map.put(map, name, inner_map)
   end
 
-  def resolver([nested, name, resolver, list], map, references) do
+  def resolver([name, resolver, list], map, references) do
     inner_resolvers =
-      Enum.reduce(list, build_map(map, nested), fn {module, value}, m ->
-        module.resolver(value, m, references)
-      end)
+      Enum.reduce(list, %{}, fn {module, value}, m -> module.resolver(value, m, references) end)
 
     Map.put(map, name, {resolver, inner_resolvers})
   end
-
-  defp build_map(map, nested), do: if(nested, do: %{}, else: map)
 end
