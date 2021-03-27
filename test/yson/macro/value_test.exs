@@ -1,7 +1,7 @@
-defmodule Graphy.Macro.ValueTest do
+defmodule Yson.Macro.ValueTest do
   use ExUnit.Case
-  alias Graphy.Macro.Value
-  use Graphy.Macro.Value
+  alias Yson.Macro.Value
+  use Yson.Macro.Value
 
   def echo_resolver(e), do: e
 

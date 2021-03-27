@@ -1,6 +1,6 @@
-defmodule Graphy.GraphQL.Builder do
+defmodule Yson.GraphQL.Builder do
   @moduledoc false
-  alias Graphy.Util
+  alias Yson.Util
 
   def build(%{kind: kind, object: object, arguments: arguments, body: body}, variables) do
     variables = fetch_variables(variables, arguments)

@@ -1,6 +1,6 @@
-defmodule Graphy.Util.MapTest do
+defmodule Yson.Util.MapTest do
   use ExUnit.Case
-  alias Graphy.Util
+  alias Yson.Util
 
   describe "on subset" do
     test "return filtered map" do

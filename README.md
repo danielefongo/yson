@@ -1,30 +1,30 @@
-# Graphy
+# Yson
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/danielefongo/graphy/ci)
-![Coveralls](https://img.shields.io/coveralls/github/danielefongo/graphy)
-![GitHub](https://img.shields.io/github/license/danielefongo/graphy)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/danielefongo/yson/ci)
+![Coveralls](https://img.shields.io/coveralls/github/danielefongo/yson)
+![GitHub](https://img.shields.io/github/license/danielefongo/yson)
 
 Run graphql requests and parse responses in an easy way.
 
 ## Installation
 
-The package can be installed by adding `graphy` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `yson` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:graphy, git: "https://github.com/danielefongo/graphy.git"}
+    {:yson, git: "https://github.com/danielefongo/yson.git"}
   ]
 end
 ```
 
 ## Usage
 
-First create a `Graphy` object:
+First create a `Yson` object:
 
 ``` elixir
 defmodule Person do
-  use Graphy
+  use Yson
 
   query :person do # defines a query on map :person
     arg :user do
@@ -56,10 +56,10 @@ defmodule Person do
 end
 ```
 
-Then do a request to your graphql endpoint using `Graphy.Api`:
+Then do a request to your graphql endpoint using `Yson.Api`:
 
 ```elixir
-alias Graphy.Api
+alias Yson.Api
 
 variables = %{fiscal_id: "01234"}
 headers = [] #optional
@@ -82,17 +82,17 @@ The result will be already mapped using resolvers, so it could be something like
 
 ## Custom usage
 
-The `Graphy` object exposes two methods:
+The `Yson` object exposes two methods:
 - `&describe/0`, to build the object description.
 - `&resolvers/0`, to build the object resolvers tree.
 
-that can be combined with the modules `Graphy.Builder` and `Graphy.Parser`.
+that can be combined with the modules `Yson.Builder` and `Yson.Parser`.
 
 ### Create query
 
-`&Graphy.Builder.build/2` accepts a Graphy description and the variables. A usage can be the following:
+`&Yson.Builder.build/2` accepts a Yson description and the variables. A usage can be the following:
 ```elixir
-iex> Graphy.Builder.build(Person.describe(), variables)
+iex> Yson.Builder.build(Person.describe(), variables)
 iex> %{
   query: "query ($fiscalId: String) {\n  person(user: {fiscalId: $fiscalId}) {\n    email\n    user {\n      ... on LegalPerson {\n        companyName\n      }\n      ... on NaturalPerson {\n        firstName\n        lastName\n      }\n    }\n  }\n}",
   variables: %{fiscal_id: "01234"}
@@ -100,9 +100,9 @@ iex> %{
 ```
 
 ### Parse response
-`&Graphy.Parser.parse/2` accepts a Graphy resolvers tree and the payload (map with atom keys). A usage can be the following:
+`&Yson.Parser.parse/2` accepts a Yson resolvers tree and the payload (map with atom keys). A usage can be the following:
 ```elixir
-iex> Graphy.Parser.parse(Person.resolvers(), payload)
+iex> Yson.Parser.parse(Person.resolvers(), payload)
 iex> %{
   person: %{
     email: "a@b.c",

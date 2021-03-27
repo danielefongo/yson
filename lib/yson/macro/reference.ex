@@ -1,10 +1,10 @@
-defmodule Graphy.Macro.Reference do
+defmodule Yson.Macro.Reference do
   @moduledoc false
-  use Graphy.Macro
+  use Yson.Macro
 
   defmacro __using__(_) do
     quote do
-      alias Graphy.Macro.Reference
+      alias Yson.Macro.Reference
       require Reference
 
       defmacro reference(reference), do: {Reference, [reference]}

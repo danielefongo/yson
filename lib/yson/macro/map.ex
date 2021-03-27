@@ -1,11 +1,11 @@
-defmodule Graphy.Macro.Map do
+defmodule Yson.Macro.Map do
   @moduledoc false
-  use Graphy.Macro
+  use Yson.Macro
 
   defmacro __using__(_) do
     quote do
-      use Graphy.Macro
-      alias Graphy.Macro.Map
+      use Yson.Macro
+      alias Yson.Macro.Map
       require Map
 
       @allowed_macros [:value, :reference, :map, :interface]

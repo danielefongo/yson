@@ -1,8 +1,8 @@
-defmodule Graphy.Macro.MapTest do
+defmodule Yson.Macro.MapTest do
   use ExUnit.Case
-  alias Graphy.Macro.{Map, Value}
-  use Graphy.Macro.Map
-  use Graphy.Macro.Value
+  alias Yson.Macro.{Map, Value}
+  use Yson.Macro.Map
+  use Yson.Macro.Value
 
   def echo_resolver(e), do: e
 

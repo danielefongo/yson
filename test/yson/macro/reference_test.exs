@@ -1,8 +1,8 @@
-defmodule Graphy.Macro.ReferenceTest do
+defmodule Yson.Macro.ReferenceTest do
   use ExUnit.Case
-  alias Graphy.Macro.{Reference, Value}
-  use Graphy.Macro.Reference
-  use Graphy.Macro.Value
+  alias Yson.Macro.{Reference, Value}
+  use Yson.Macro.Reference
+  use Yson.Macro.Value
 
   describe "on macro" do
     test "reference returns valid payload" do

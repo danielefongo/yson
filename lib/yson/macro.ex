@@ -1,10 +1,10 @@
-defmodule Graphy.Macro do
+defmodule Yson.Macro do
   @moduledoc false
 
   defmacro __using__(_) do
     quote do
-      require Graphy.Macro
-      import Graphy.Macro
+      require Yson.Macro
+      import Yson.Macro
       import Function, only: [identity: 1]
     end
   end

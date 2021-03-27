@@ -1,9 +1,9 @@
-defmodule Graphy.Builder.MixProject do
+defmodule Yson.Builder.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :graphy,
+      app: :yson,
       version: "0.1.0",
       elixir: "~> 1.10",
       elixirc_paths: elixirc_paths(Mix.env()),

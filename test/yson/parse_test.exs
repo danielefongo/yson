@@ -1,6 +1,6 @@
-defmodule Graphy.ParserTest do
+defmodule Yson.ParserTest do
   use ExUnit.Case
-  alias Graphy.Parser
+  alias Yson.Parser
   import Function, only: [identity: 1]
 
   def reverse_text(data), do: String.reverse(data)

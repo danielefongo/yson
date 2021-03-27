@@ -1,10 +1,10 @@
-defmodule Graphy.GraphQL.ApiTest do
+defmodule Yson.GraphQL.ApiTest do
   use ExUnit.Case
   use TestApi
-  alias Graphy.GraphQL.Api
+  alias Yson.GraphQL.Api
   alias Support.{PersonClient, PersonServer}
 
-  api_test "ask and parse using Graphy schema" do
+  api_test "ask and parse using Yson schema" do
     expected_result = %{sample: %{email: "a@b.c", user: %{full_name: "legal name"}}}
     variables = %{email: "a@b.c"}
 

@@ -1,4 +1,4 @@
-defmodule Graphy.GraphQL.BuilderTest do
+defmodule Yson.GraphQL.BuilderTest do
   use ExUnit.Case
 
   @object :people
@@ -182,6 +182,6 @@ defmodule Graphy.GraphQL.BuilderTest do
     do: build(:mutation, object, args, body, vars)
 
   defp build(kind, object, args, body, vars) do
-    Graphy.GraphQL.Builder.build(%{kind: kind, object: object, arguments: args, body: body}, vars)
+    Yson.GraphQL.Builder.build(%{kind: kind, object: object, arguments: args, body: body}, vars)
   end
 end

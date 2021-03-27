@@ -1,4 +1,4 @@
-defmodule Graphy.Util.Indent do
+defmodule Yson.Util.Indent do
   @moduledoc false
   @indentation "  "
 

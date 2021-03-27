@@ -1,11 +1,11 @@
-defmodule Graphy.GraphQLTest do
+defmodule Yson.GraphQLTest do
   use ExUnit.Case
-  require Graphy.GraphQL
-  import Graphy.GraphQL
+  require Yson.GraphQL
+  import Yson.GraphQL
   import Function, only: [identity: 1]
 
   defmodule Sample do
-    use Graphy.GraphQL
+    use Yson.GraphQL
 
     query :sample do
       arg :user do
@@ -94,7 +94,7 @@ defmodule Graphy.GraphQLTest do
                   company_name: &identity/1,
                   first_name: &identity/1,
                   second_name: &identity/1,
-                  user: {&Graphy.GraphQLTest.Sample.user/1, %{email: &identity/1}},
+                  user: {&Yson.GraphQLTest.Sample.user/1, %{email: &identity/1}},
                   data: {&identity/1, %{some_data: &identity/1}}
                 }}
            }

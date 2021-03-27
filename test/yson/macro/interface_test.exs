@@ -1,6 +1,6 @@
-defmodule Graphy.Macro.InterfaceTest do
+defmodule Yson.Macro.InterfaceTest do
   use ExUnit.Case
-  alias Graphy.Macro.{Interface, Value}
+  alias Yson.Macro.{Interface, Value}
   use Interface
   use Value
 

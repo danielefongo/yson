@@ -1,10 +1,10 @@
-defmodule Graphy.Macro.Value do
+defmodule Yson.Macro.Value do
   @moduledoc false
-  use Graphy.Macro
+  use Yson.Macro
 
   defmacro __using__(_) do
     quote do
-      alias Graphy.Macro.Value
+      alias Yson.Macro.Value
       require Value
 
       defmacro value(name, resolver \\ quote(do: &identity/1)),

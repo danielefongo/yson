@@ -1,6 +1,6 @@
-defmodule Graphy.Util.IndentTest do
+defmodule Yson.Util.IndentTest do
   use ExUnit.Case
-  alias Graphy.Util.Indent
+  alias Yson.Util.Indent
 
   test "indent flat" do
     assert Indent.indent(["a", "b"]) == "a\nb"

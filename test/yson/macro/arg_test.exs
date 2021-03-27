@@ -1,6 +1,6 @@
-defmodule Graphy.Macro.ArgTest do
+defmodule Yson.Macro.ArgTest do
   use ExUnit.Case
-  use Graphy.Macro.Arg
+  use Yson.Macro.Arg
 
   test "single argument" do
     data = arg(:foo, :string)

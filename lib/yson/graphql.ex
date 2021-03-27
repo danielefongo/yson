@@ -1,12 +1,12 @@
-defmodule Graphy.GraphQL do
+defmodule Yson.GraphQL do
   @moduledoc false
-  use Graphy.Macro
-  use Graphy.Macro.{Arg, Interface, Map, Reference, Value}
+  use Yson.Macro
+  use Yson.Macro.{Arg, Interface, Map, Reference, Value}
 
   defmacro __using__(_) do
     quote do
-      require Graphy.GraphQL
-      import Graphy.GraphQL
+      require Yson.GraphQL
+      import Yson.GraphQL
       @before_compile unquote(__MODULE__)
     end
   end

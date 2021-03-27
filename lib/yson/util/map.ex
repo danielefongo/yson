@@ -1,4 +1,4 @@
-defmodule Graphy.Util.Map do
+defmodule Yson.Util.Map do
   @moduledoc false
 
   def subset(map, keys) do

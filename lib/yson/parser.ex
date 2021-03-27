@@ -1,4 +1,4 @@
-defmodule Graphy.Parser do
+defmodule Yson.Parser do
   @moduledoc false
   import Enum
   import Recase

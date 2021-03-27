@@ -1,10 +1,10 @@
-defmodule Graphy.Macro.Arg do
+defmodule Yson.Macro.Arg do
   @moduledoc false
 
   defmacro __using__(_) do
     quote do
-      use Graphy.Macro
-      alias Graphy.Macro.Arg
+      use Yson.Macro
+      alias Yson.Macro.Arg
       require Arg
 
       @allowed_macros [:arg]
