@@ -24,7 +24,7 @@ First create a `Yson` object:
 
 ``` elixir
 defmodule Person do
-  use Yson
+  use Yson.GraphQL
 
   query :person do # defines a query on map :person
     arg :user do
@@ -41,7 +41,7 @@ defmodule Person do
         value(:last_name)
       end
 
-      ref(:legal_person, :legal_person)
+      reference(:legal_person)
 
       resolver()
     end
@@ -59,7 +59,7 @@ end
 Then do a request to your graphql endpoint using `Yson.Api`:
 
 ```elixir
-alias Yson.Api
+alias Yson.GraphQL.Api
 
 variables = %{fiscal_id: "01234"}
 headers = [] #optional
@@ -92,7 +92,7 @@ that can be combined with the modules `Yson.Builder` and `Yson.Parser`.
 
 `&Yson.Builder.build/2` accepts a Yson description and the variables. A usage can be the following:
 ```elixir
-iex> Yson.Builder.build(Person.describe(), variables)
+iex> Yson.GraphQL.Builder.build(Person.describe(), variables)
 iex> %{
   query: "query ($fiscalId: String) {\n  person(user: {fiscalId: $fiscalId}) {\n    email\n    user {\n      ... on LegalPerson {\n        companyName\n      }\n      ... on NaturalPerson {\n        firstName\n        lastName\n      }\n    }\n  }\n}",
   variables: %{fiscal_id: "01234"}
