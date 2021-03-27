@@ -1,5 +1,6 @@
 defmodule Graphy.Macro.ValueTest do
   use ExUnit.Case
+  alias Graphy.Macro.Value
   use Graphy.Macro.Value
 
   def echo_resolver(e), do: e
@@ -18,5 +19,17 @@ defmodule Graphy.Macro.ValueTest do
       assert module == Value
       assert data == [:foo, &echo_resolver/1]
     end
+  end
+
+  test "value insert description to map" do
+    description = Value.describe([:foo, &Function.identity/1], %{data: :any}, [])
+
+    assert description == %{data: :any, foo: nil}
+  end
+
+  test "value insert resolver to map" do
+    resolver = Value.resolver([:foo, &Function.identity/1], %{data: :any}, [])
+
+    assert resolver == %{data: :any, foo: &Function.identity/1}
   end
 end
