@@ -1,14 +1,14 @@
-defmodule Graphy.Macro.RefTest do
+defmodule Graphy.Macro.ReferenceTest do
   use ExUnit.Case
-  alias Graphy.Macro.{Ref, Value}
-  use Graphy.Macro.Ref
+  alias Graphy.Macro.{Reference, Value}
+  use Graphy.Macro.Reference
   use Graphy.Macro.Value
 
   describe "on macro" do
     test "reference returns valid payload" do
-      {module, data} = ref(:another)
+      {module, data} = reference(:another)
 
-      assert module == Ref
+      assert module == Reference
       assert data == [:another]
     end
   end
@@ -16,7 +16,7 @@ defmodule Graphy.Macro.RefTest do
   test "reference insert description to map" do
     references = [referred: {Value, [:foo, &Function.identity/1]}]
 
-    description = Ref.describe([:referred], %{data: :any}, references)
+    description = Reference.describe([:referred], %{data: :any}, references)
 
     assert description == %{data: :any, foo: nil}
   end
@@ -24,7 +24,7 @@ defmodule Graphy.Macro.RefTest do
   test "reference merges nested resolvers to map" do
     references = [referred: {Value, [:foo, &Function.identity/1]}]
 
-    resolver = Ref.resolver([:referred], %{data: :any}, references)
+    resolver = Reference.resolver([:referred], %{data: :any}, references)
 
     assert resolver == %{data: :any, foo: &Function.identity/1}
   end

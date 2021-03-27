@@ -1,7 +1,7 @@
 defmodule Graphy.GraphQL do
   @moduledoc false
   use Graphy.Macro
-  use Graphy.Macro.{Arg, Interface, Map, Ref, Value}
+  use Graphy.Macro.{Arg, Interface, Map, Reference, Value}
 
   defmacro __using__(_) do
     quote do

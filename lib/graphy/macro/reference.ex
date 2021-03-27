@@ -1,13 +1,13 @@
-defmodule Graphy.Macro.Ref do
+defmodule Graphy.Macro.Reference do
   @moduledoc false
   use Graphy.Macro
 
   defmacro __using__(_) do
     quote do
-      alias Graphy.Macro.Ref
-      require Ref
+      alias Graphy.Macro.Reference
+      require Reference
 
-      defmacro ref(reference), do: {Ref, [reference]}
+      defmacro reference(reference), do: {Reference, [reference]}
     end
   end
 

@@ -15,10 +15,10 @@ defmodule Graphy.GraphQLTest do
     end
 
     map :sample do
-      ref(:user)
-      ref(:data)
-      ref(:natural_person)
-      ref(:legal_person)
+      reference(:user)
+      reference(:data)
+      reference(:natural_person)
+      reference(:legal_person)
     end
 
     map :user, resolver: &Sample.user/1 do
