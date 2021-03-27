@@ -1,6 +1,5 @@
 defmodule Graphy.Macro.Arg do
   @moduledoc false
-  use Graphy.Macro
 
   defmacro __using__(_) do
     quote do
