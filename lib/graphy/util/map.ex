@@ -1,4 +1,4 @@
-defmodule Graphy.MapUtil do
+defmodule Graphy.Util.Map do
   @moduledoc false
 
   def subset(map, keys) do

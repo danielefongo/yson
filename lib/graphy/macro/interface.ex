@@ -7,6 +7,7 @@ defmodule Graphy.Macro.Interface do
       use Graphy.Macro
       alias Graphy.Macro.Interface
       require Interface
+
       @allowed_macros [:value, :ref, :map, :interface]
       @mapping %{map: :nested_map, interface: :nested_interface}
 

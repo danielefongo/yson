@@ -7,6 +7,7 @@ defmodule Graphy.Macro.Arg do
       use Graphy.Macro
       alias Graphy.Macro.Arg
       require Arg
+
       @allowed_macros [:arg]
 
       defmacro arg(name, type) when is_atom(type) do

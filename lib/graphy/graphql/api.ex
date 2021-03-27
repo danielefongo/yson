@@ -1,6 +1,7 @@
-defmodule Graphy.Api do
+defmodule Graphy.Graphql.Api do
   @moduledoc false
-  alias Graphy.{Builder, Parser}
+  alias Graphy.Graphql.Builder
+  alias Graphy.Parser
 
   def run(schema, vars, graphql_url, headers \\ [], options \\ []) do
     body =
