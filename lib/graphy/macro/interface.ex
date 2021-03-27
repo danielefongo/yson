@@ -14,7 +14,7 @@ defmodule Graphy.Macro.Interface do
       defmacro interface(name, _opts \\ [], do: body) do
         fields = fetch(body, @allowed_macros, @mapping)
 
-        node = quote do: {Interface, [false, unquote(name), &identity/1, unquote(fields)]}
+        node = quote do: {Interface, [unquote(name), unquote(fields)]}
 
         update_attributes(:references, name, node)
       end
@@ -22,29 +22,23 @@ defmodule Graphy.Macro.Interface do
       defmacro nested_interface(name, _opts \\ [], do: body) do
         fields = fetch(body, @allowed_macros, @mapping)
 
-        {Interface, [true, name, &identity/1, fields]}
+        {Interface, [name, fields]}
       end
     end
   end
 
-  def describe([nested, name, _resolver, list], map, references) do
+  def describe([name, list], map, references) do
     inner_keywords =
       list
-      |> Enum.reduce(build_map(map, nested), fn {module, value}, m ->
-        module.describe(value, m, references)
-      end)
+      |> Enum.reduce(%{}, fn {module, value}, m -> module.describe(value, m, references) end)
       |> Enum.to_list()
 
     Map.put(map, name, inner_keywords)
   end
 
-  def resolver([nested, _name, _resolver, list], map, references) do
+  def resolver([_name, list], map, references) do
     list
-    |> Enum.reduce(build_map(map, nested), fn {module, value}, m ->
-      module.resolver(value, m, references)
-    end)
+    |> Enum.reduce(%{}, fn {module, value}, m -> module.resolver(value, m, references) end)
     |> Map.merge(map)
   end
-
-  defp build_map(map, nested), do: if(nested, do: %{}, else: map)
 end

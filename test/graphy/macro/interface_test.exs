@@ -1,7 +1,10 @@
 defmodule Graphy.Macro.InterfaceTest do
   use ExUnit.Case
-  use Graphy.Macro.Interface
-  use Graphy.Macro.Value
+  alias Graphy.Macro.{Interface, Value}
+  use Interface
+  use Value
+
+  def echo_resolver(e), do: e
 
   describe "on macro" do
     test "interface returns valid payload" do
@@ -11,12 +14,10 @@ defmodule Graphy.Macro.InterfaceTest do
           value(:foo2)
         end
 
-      [nested, name, resolver, _] = data
+      [name, _] = data
 
       assert module == Interface
-      assert nested == false
       assert name == :foo
-      assert resolver == (&Function.identity/1)
     end
 
     test "nested interface returns valid payload" do
@@ -26,12 +27,26 @@ defmodule Graphy.Macro.InterfaceTest do
           value(:foo2)
         end
 
-      [nested, name, resolver, _] = data
+      [name, _] = data
 
       assert module == Interface
-      assert nested == true
       assert name == :foo
-      assert resolver == (&Function.identity/1)
     end
+  end
+
+  test "interface insert description to map" do
+    value = {Value, [:foo, &Function.identity/1]}
+
+    description = Interface.describe([:interface, [value]], %{data: :any}, %{})
+
+    assert description == %{data: :any, interface: [foo: nil]}
+  end
+
+  test "interface merges nested resolvers to map" do
+    value = {Value, [:foo, &Function.identity/1]}
+
+    description = Interface.resolver([:interface, [value]], %{data: :any}, %{})
+
+    assert description == %{data: :any, foo: &Function.identity/1}
   end
 end
