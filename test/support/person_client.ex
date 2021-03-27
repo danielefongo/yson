@@ -9,7 +9,7 @@ defmodule Support.PersonClient do
     end
   end
 
-  object :sample do
+  map :sample do
     value(:email)
     ref(:user, :user)
   end

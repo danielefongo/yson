@@ -4,6 +4,8 @@ defmodule GraphyTest do
   import Graphy
   import Function, only: [identity: 1]
 
+  alias Graphy.Macro.{Interface, Map, Ref, Value}
+
   def echo_resolver(e), do: e
 
   defmodule Sample do
@@ -16,21 +18,23 @@ defmodule GraphyTest do
       end
     end
 
-    object :sample do
+    map :sample do
       ref(:user, :user)
+      ref(:data, :data)
       ref(:natural_person, :natural_person)
-
-      interface :legal_person do
-        value(:company_name)
-      end
-
-      map :data do
-        value(:some_data)
-      end
+      ref(:legal_person, :legal_person)
     end
 
     map :user, resolver: &Sample.user/1 do
       value(:email)
+    end
+
+    interface :legal_person do
+      value(:company_name)
+    end
+
+    map :data do
+      value(:some_data)
     end
 
     interface :natural_person do
@@ -44,17 +48,17 @@ defmodule GraphyTest do
   describe "on body" do
     test "value with default resolver" do
       data = value(:foo)
-      assert data == [:field, :foo, &Function.identity/1]
+      assert data == {Value, [:foo, &Function.identity/1]}
     end
 
     test "value with custom resolver" do
       data = value(:foo, &Sample.user/1)
-      assert data == [:field, :foo, &Sample.user/1]
+      assert data == {Value, [:foo, &Sample.user/1]}
     end
 
     test "reference" do
       data = ref(:foo, :another)
-      assert data == [:ref, :foo, :another]
+      assert data == {Ref, [:foo, :another]}
     end
 
     test "map with default resolver" do
@@ -64,16 +68,18 @@ defmodule GraphyTest do
           value(:foo2)
         end
 
-      assert data == [
-               :map,
-               false,
-               :foo,
-               &Function.identity/1,
+      assert data == {
+               Map,
                [
-                 [:field, :foo, &Function.identity/1],
-                 [:field, :foo2, &Function.identity/1]
+                 false,
+                 :foo,
+                 &Function.identity/1,
+                 [
+                   {Value, [:foo, &Function.identity/1]},
+                   {Value, [:foo2, &Function.identity/1]}
+                 ]
                ]
-             ]
+             }
     end
 
     test "map with custom resolver" do
@@ -82,15 +88,17 @@ defmodule GraphyTest do
           value(:foo)
         end
 
-      assert data == [
-               :map,
-               false,
-               :foo,
-               &Sample.user/1,
+      assert data == {
+               Map,
                [
-                 [:field, :foo, &Function.identity/1]
+                 false,
+                 :foo,
+                 &Sample.user/1,
+                 [
+                   {Value, [:foo, &Function.identity/1]}
+                 ]
                ]
-             ]
+             }
     end
 
     test "nested map" do
@@ -100,16 +108,18 @@ defmodule GraphyTest do
           value(:foo2)
         end
 
-      assert data == [
-               :map,
-               true,
-               :foo,
-               &Function.identity/1,
+      assert data == {
+               Map,
                [
-                 [:field, :foo, &Function.identity/1],
-                 [:field, :foo2, &Function.identity/1]
+                 true,
+                 :foo,
+                 &Function.identity/1,
+                 [
+                   {Value, [:foo, &Function.identity/1]},
+                   {Value, [:foo2, &Function.identity/1]}
+                 ]
                ]
-             ]
+             }
     end
 
     test "interface" do
@@ -118,15 +128,17 @@ defmodule GraphyTest do
           value(:foo)
         end
 
-      assert data == [
-               :interface,
-               false,
-               :foo,
-               &Function.identity/1,
+      assert data == {
+               Interface,
                [
-                 [:field, :foo, &Function.identity/1]
+                 false,
+                 :foo,
+                 &Function.identity/1,
+                 [
+                   {Value, [:foo, &Function.identity/1]}
+                 ]
                ]
-             ]
+             }
     end
 
     test "nested interface" do
@@ -135,57 +147,17 @@ defmodule GraphyTest do
           value(:foo)
         end
 
-      assert data == [
-               :interface,
-               true,
-               :foo,
-               &Function.identity/1,
+      assert data == {
+               Interface,
                [
-                 [:field, :foo, &Function.identity/1]
+                 true,
+                 :foo,
+                 &Function.identity/1,
+                 [
+                   {Value, [:foo, &Function.identity/1]}
+                 ]
                ]
-             ]
-    end
-
-    test "object with default resolver" do
-      data =
-        object :foo do
-          value(:one)
-          value(:two)
-        end
-
-      assert data == [
-               :map,
-               false,
-               :foo,
-               &Function.identity/1,
-               [[:field, :one, &Function.identity/1], [:field, :two, &Function.identity/1]]
-             ]
-    end
-
-    test "object with custom resolver" do
-      data =
-        object :foo, resolver: &Sample.user/1 do
-          value(:one)
-        end
-
-      assert data == [:map, false, :foo, &Sample.user/1, [[:field, :one, &Function.identity/1]]]
-    end
-
-    test "object with nested map" do
-      data =
-        object :foo do
-          map :bar do
-            value(:baz)
-          end
-        end
-
-      assert data == [
-               :map,
-               false,
-               :foo,
-               &Function.identity/1,
-               [[:map, true, :bar, &Function.identity/1, [[:field, :baz, &Function.identity/1]]]]
-             ]
+             }
     end
   end
 
