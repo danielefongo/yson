@@ -1,7 +1,7 @@
-defmodule Graphy.Graphql.ApiTest do
+defmodule Graphy.GraphQL.ApiTest do
   use ExUnit.Case
   use TestApi
-  alias Graphy.Graphql.Api
+  alias Graphy.GraphQL.Api
   alias Support.{PersonClient, PersonServer}
 
   api_test "ask and parse using Graphy schema" do

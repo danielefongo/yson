@@ -1,4 +1,4 @@
-defmodule Graphy.Graphql.BuilderTest do
+defmodule Graphy.GraphQL.BuilderTest do
   use ExUnit.Case
 
   @object :people
@@ -182,6 +182,6 @@ defmodule Graphy.Graphql.BuilderTest do
     do: build(:mutation, object, args, body, vars)
 
   defp build(kind, object, args, body, vars) do
-    Graphy.Graphql.Builder.build(%{kind: kind, object: object, arguments: args, body: body}, vars)
+    Graphy.GraphQL.Builder.build(%{kind: kind, object: object, arguments: args, body: body}, vars)
   end
 end

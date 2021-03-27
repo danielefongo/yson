@@ -1,4 +1,4 @@
-defmodule Graphy.Graphql.Builder do
+defmodule Graphy.GraphQL.Builder do
   @moduledoc false
   alias Graphy.Util
 
