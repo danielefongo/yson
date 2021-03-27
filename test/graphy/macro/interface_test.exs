@@ -45,8 +45,8 @@ defmodule Graphy.Macro.InterfaceTest do
   test "interface merges nested resolvers to map" do
     value = {Value, [:foo, &Function.identity/1]}
 
-    description = Interface.resolver([:interface, [value]], %{data: :any}, %{})
+    resolver = Interface.resolver([:interface, [value]], %{data: :any}, %{})
 
-    assert description == %{data: :any, foo: &Function.identity/1}
+    assert resolver == %{data: :any, foo: &Function.identity/1}
   end
 end

@@ -7,18 +7,18 @@ defmodule Graphy.Macro.Ref do
       alias Graphy.Macro.Ref
       require Ref
 
-      defmacro ref(name, reference), do: {Ref, [name, reference]}
+      defmacro ref(reference), do: {Ref, [reference]}
     end
   end
 
-  def describe([_, ref], map, references) do
+  def describe([ref], map, references) do
     references
     |> Keyword.get(ref)
     |> apply_nested(:describe, references)
     |> Map.merge(map)
   end
 
-  def resolver([_, ref], map, references) do
+  def resolver([ref], map, references) do
     references
     |> Keyword.get(ref)
     |> apply_nested(:resolver, references)

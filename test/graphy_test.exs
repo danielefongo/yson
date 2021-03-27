@@ -15,10 +15,10 @@ defmodule GraphyTest do
     end
 
     map :sample do
-      ref(:user, :user)
-      ref(:data, :data)
-      ref(:natural_person, :natural_person)
-      ref(:legal_person, :legal_person)
+      ref(:user)
+      ref(:data)
+      ref(:natural_person)
+      ref(:legal_person)
     end
 
     map :user, resolver: &Sample.user/1 do
