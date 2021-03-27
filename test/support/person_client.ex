@@ -1,6 +1,6 @@
 defmodule Support.PersonClient do
   @moduledoc false
-  use Graphy
+  use Graphy.GraphQL
   alias __MODULE__
 
   query :sample do
