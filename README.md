@@ -20,7 +20,7 @@ end
 
 ## Usage
 
-First create a `Yson` object:
+First create a `Yson.GraphQL` object:
 
 ``` elixir
 defmodule Person do
@@ -56,7 +56,7 @@ defmodule Person do
 end
 ```
 
-Then do a request to your graphql endpoint using `Yson.Api`:
+Then do a request to your graphql endpoint using `Yson.GraphQL.Api`:
 
 ```elixir
 alias Yson.GraphQL.Api
@@ -82,7 +82,7 @@ The result will be already mapped using resolvers, so it could be something like
 
 ## Custom usage
 
-The `Yson` object exposes two methods:
+The `Yson.GraphQL` object exposes two methods:
 - `&describe/0`, to build the object description.
 - `&resolvers/0`, to build the object resolvers tree.
 
@@ -90,7 +90,7 @@ that can be combined with the modules `Yson.Builder` and `Yson.Parser`.
 
 ### Create query
 
-`&Yson.Builder.build/2` accepts a Yson description and the variables. A usage can be the following:
+`&Yson.GraphQL.Builder.build/2` accepts a Yson description and the variables. A usage can be the following:
 ```elixir
 iex> Yson.GraphQL.Builder.build(Person.describe(), variables)
 iex> %{
