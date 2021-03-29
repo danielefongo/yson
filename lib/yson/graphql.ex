@@ -20,6 +20,10 @@ defmodule Yson.GraphQL do
     references = Module.get_attribute(module, :references)
     {module, data} = Keyword.get(references, object)
 
+    if module != Map do
+      raise "Only maps are allowed as roots"
+    end
+
     body = module.describe(data, %{}, references)
     resolvers = module.resolver(data, %{}, references)
 

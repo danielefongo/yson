@@ -9,9 +9,9 @@ defmodule Yson.Macro do
     end
   end
 
-  def update_attributes(category, name, keywords, update \\ true) do
+  def update_attributes(category, name, keywords) do
     quote do
-      if :elixir_module.mode(__MODULE__) == :all and unquote(update) do
+      if :elixir_module.mode(__MODULE__) == :all do
         data = Module.get_attribute(__MODULE__, unquote(category), [])
         data = Keyword.put(data, unquote(name), unquote(keywords))
         Module.put_attribute(__MODULE__, unquote(category), data)
