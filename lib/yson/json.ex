@@ -18,7 +18,7 @@ defmodule Yson.Json do
   defmacro __before_compile__(_env) do
     module = __CALLER__.module
 
-    description = Module.get_attribute(module, :description)
+    [resolver, description] = Module.get_attribute(module, :description)
     references = Module.get_attribute(module, :references)
 
     body =
@@ -33,16 +33,17 @@ defmodule Yson.Json do
 
     quote do
       def describe, do: unquote(Macro.escape(body))
-      def resolvers, do: unquote(Macro.escape(resolvers))
+      def resolvers, do: {unquote(resolver), unquote(Macro.escape(resolvers))}
     end
   end
 
-  defmacro root(do: body) do
+  defmacro root(opts \\ [], do: body) do
     fields = fetch(body, @allowed_macros, @mapping)
+    resolver = Keyword.get(opts, :resolver, &identity/1)
 
     quote do
       if :elixir_module.mode(__MODULE__) == :all do
-        Module.put_attribute(__MODULE__, :description, unquote(fields))
+        Module.put_attribute(__MODULE__, :description, [unquote(resolver), unquote(fields)])
       end
 
       unquote(fields)

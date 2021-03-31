@@ -8,7 +8,7 @@ defmodule Yson.JsonTest do
   defmodule Sample do
     use Yson.Json
 
-    root do
+    root resolver: &Sample.root/1 do
       value(:foo)
       reference(:sample)
     end
@@ -38,6 +38,7 @@ defmodule Yson.JsonTest do
     end
 
     def user(data), do: data
+    def root(data), do: data
   end
 
   test "root" do
@@ -69,17 +70,21 @@ defmodule Yson.JsonTest do
   end
 
   test "generate resolvers" do
-    assert Sample.resolvers() == %{
-             foo: &identity/1,
-             sample:
-               {&identity/1,
-                %{
-                  company_name: &identity/1,
-                  first_name: &identity/1,
-                  second_name: &identity/1,
-                  user: {&Yson.JsonTest.Sample.user/1, %{email: &identity/1}},
-                  data: {&identity/1, %{some_data: &identity/1}}
-                }}
-           }
+    assert Sample.resolvers() ==
+             {
+               &Yson.JsonTest.Sample.root/1,
+               %{
+                 foo: &identity/1,
+                 sample:
+                   {&identity/1,
+                    %{
+                      company_name: &identity/1,
+                      first_name: &identity/1,
+                      second_name: &identity/1,
+                      user: {&Yson.JsonTest.Sample.user/1, %{email: &identity/1}},
+                      data: {&identity/1, %{some_data: &identity/1}}
+                    }}
+               }
+             }
   end
 end
