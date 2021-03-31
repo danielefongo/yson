@@ -113,7 +113,7 @@ iex> %{
 ```
 
 ## Json version
-Actually there is no implemented Api module for Json version, but you can still parse responses (nb: the parser converts keys to snake_case keys).
+Actually there is no implemented Api module for Json version, but you can still parse responses.
 
 ### Define schema
 The first step is to define a `Yson.Json` schema.
@@ -148,12 +148,17 @@ end
 ### Parse response
 `&Yson.Parser.parse/2` accepts a Yson resolvers tree and the payload (map with atom keys). A usage can be the following:
 ```elixir
-iex> payload = %{email: "a@b.c", user: %{company_name: "legal name"}}
-iex> Yson.Parser.parse(Person.resolvers(), payload)
+iex> payload = %{email: "a@b.c", user: %{companyName: "legal name"}}
+iex> recase = :snake
+iex> Yson.Parser.parse(Person.resolvers(), payload, recase)
 iex> %{email: "a@b.c", user: %{full_name: "legal name"}}
 ```
 
+You can choose one of the following key recasing:
+- `:snake` converts payload keys to snake case before parsing
+- `:camel` converts payload keys to camel case before parsing
+- `:no_case` does not convert payload keys before parsing
+
 ## Next steps
-[] configure Yson.Parser to use custom keys case (now it converts data keys to snake_case keys)
 [] import references from another Module
 [] json api

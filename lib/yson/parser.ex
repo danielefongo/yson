@@ -3,24 +3,38 @@ defmodule Yson.Parser do
   import Enum
   import Recase
 
-  def parse(resolvers, data) when is_map(resolvers) and is_map(data) do
-    parse_nested_data(resolvers, data)
+  def parse(resolvers, data, to_case \\ :no_case), do: inner_parse(resolvers, data, to_case)
+
+  def inner_parse(resolvers, data, to_case) when is_map(resolvers) and is_map(data) do
+    inner_parse_nested_map(resolvers, data, to_case)
   end
 
-  def parse({resolver, resolvers}, data) when is_map(data) do
+  def inner_parse({resolver, resolvers}, data, to_case) when is_map(data) do
     resolvers
-    |> parse_nested_data(data)
+    |> inner_parse_nested_map(data, to_case)
     |> resolver.()
   end
 
-  def parse(resolver, data) when is_list(data), do: map(data, &parse(resolver, &1))
+  def inner_parse(resolver, data, to_case) when is_list(data) do
+    map(data, &inner_parse(resolver, &1, to_case))
+  end
 
-  def parse(resolver, data), do: resolver.(data)
+  def inner_parse(resolver, data, _to_case), do: resolver.(data)
 
-  def parse_nested_data(resolvers, data) do
+  def inner_parse_nested_map(resolvers, data, to_case) do
     data
-    |> filter(fn {key, _} -> not is_nil(Map.get(resolvers, to_snake(key))) end)
-    |> map(fn {key, val} -> {to_snake(key), resolvers |> Map.get(to_snake(key)) |> parse(val)} end)
+    |> map(fn {key, val} -> {recase(key, to_case), val} end)
+    |> filter(fn {key, _} -> not is_nil(Map.get(resolvers, key)) end)
+    |> map(fn {key, val} -> {key, resolvers |> Map.get(key) |> inner_parse(val, to_case)} end)
     |> into(%{})
+  end
+
+  defp recase(value, to_case) do
+    case to_case do
+      :snake -> to_snake(value)
+      :camel -> to_camel(value)
+      :no_case -> value
+      invalid_case -> raise "Invalid case: #{invalid_case}"
+    end
   end
 end

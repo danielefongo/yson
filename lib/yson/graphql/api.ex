@@ -38,5 +38,7 @@ defmodule Yson.GraphQL.Api do
     {:error, errors}
   end
 
-  defp parse_response({:ok, %{data: data}}, resolvers), do: {:ok, Parser.parse(resolvers, data)}
+  defp parse_response({:ok, %{data: data}}, resolvers) do
+    {:ok, Parser.parse(resolvers, data, :snake)}
+  end
 end

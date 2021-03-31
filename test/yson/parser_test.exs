@@ -58,7 +58,7 @@ defmodule Yson.ParserTest do
     assert Parser.parse(resolvers, data) == expected_data
   end
 
-  test "parse recasing" do
+  test "parse recasing to snake case" do
     resolvers = %{
       sample: {&identity/1, %{full_name: &identity/1}}
     }
@@ -75,7 +75,41 @@ defmodule Yson.ParserTest do
       }
     }
 
-    assert Parser.parse(resolvers, data) == expected_data
+    assert Parser.parse(resolvers, data, :snake) == expected_data
+  end
+
+  test "parse recasing to camel case" do
+    resolvers = %{
+      sample: {&identity/1, %{fullName: &identity/1}}
+    }
+
+    data = %{
+      sample: %{
+        full_name: "name"
+      }
+    }
+
+    expected_data = %{
+      sample: %{
+        fullName: "name"
+      }
+    }
+
+    assert Parser.parse(resolvers, data, :camel) == expected_data
+  end
+
+  test "parse without recasing" do
+    resolvers = %{
+      sample: {&identity/1, %{fullName: &identity/1}}
+    }
+
+    data = %{
+      sample: %{
+        fullName: "name"
+      }
+    }
+
+    assert Parser.parse(resolvers, data, :no_case) == data
   end
 
   test "parse combining resolvers" do
