@@ -154,7 +154,6 @@ iex> %{email: "a@b.c", user: %{full_name: "legal name"}}
 ```
 
 ## Next steps
-[] ignore extra keys
 [] configure Yson.Parser to use custom keys case (now it converts data keys to snake_case keys)
 [] import references from another Module
 [] json api

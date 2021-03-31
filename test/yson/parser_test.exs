@@ -127,6 +127,32 @@ defmodule Yson.ParserTest do
     assert Parser.parse(resolvers, data) == expected_data
   end
 
+  test "parse ignoring extra fields" do
+    resolvers = %{
+      sample:
+        {&identity/1,
+         %{
+           name: &identity/1
+         }}
+    }
+
+    data = %{
+      sample: %{
+        name: "name",
+        extra: "should be ignored"
+      },
+      extra: "should be ignored"
+    }
+
+    expected_data = %{
+      sample: %{
+        name: "name"
+      }
+    }
+
+    assert Parser.parse(resolvers, data) == expected_data
+  end
+
   test "parse parsing root lists" do
     resolvers = %{
       sample:
