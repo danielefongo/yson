@@ -1,8 +1,8 @@
 defmodule Yson.Macro.MapTest do
   use ExUnit.Case
   alias Yson.Macro.{Map, Value}
-  use Yson.Macro.Map
-  use Yson.Macro.Value
+  require Yson.Macro.{Map, Value}
+  import Yson.Macro.{Map, Value}
 
   def echo_resolver(e), do: e
 

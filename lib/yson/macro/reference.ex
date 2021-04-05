@@ -1,31 +1,31 @@
 defmodule Yson.Macro.Reference do
   @moduledoc false
-  use Yson.Macro
+  alias __MODULE__
+  alias Yson.Util.Attributes
 
-  defmacro __using__(_) do
+  defmacro reference(reference), do: {Reference, [reference]}
+
+  def set_reference(module, name, data) do
     quote do
-      alias Yson.Macro.Reference
-      require Reference
-
-      defmacro reference(reference), do: {Reference, [reference]}
+      Attributes.set(unquote(module), :references, unquote(name), unquote(data))
     end
   end
 
-  def describe([ref], map, references) do
-    references
-    |> Keyword.get(ref)
-    |> apply_nested(:describe, references)
+  def describe([ref], map, module) do
+    module
+    |> Attributes.get(:references, ref)
+    |> apply_nested(:describe, module)
     |> Map.merge(map)
   end
 
-  def resolver([ref], map, references) do
-    references
-    |> Keyword.get(ref)
-    |> apply_nested(:resolver, references)
+  def resolver([ref], map, module) do
+    module
+    |> Attributes.get(:references, ref)
+    |> apply_nested(:resolver, module)
     |> Map.merge(map)
   end
 
-  defp apply_nested({module, data}, fun, references) do
-    apply(module, fun, [data, %{}, references])
+  defp apply_nested({macro, data}, fun, module) do
+    apply(macro, fun, [data, %{}, module])
   end
 end

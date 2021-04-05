@@ -1,6 +1,7 @@
 defmodule Yson.Macro.ArgTest do
   use ExUnit.Case
-  use Yson.Macro.Arg
+  require Yson.Macro.Arg
+  import Yson.Macro.Arg
 
   test "single argument" do
     data = arg(:foo, :string)

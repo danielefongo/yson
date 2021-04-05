@@ -1,7 +1,8 @@
 defmodule Yson.Macro.ValueTest do
   use ExUnit.Case
   alias Yson.Macro.Value
-  use Yson.Macro.Value
+  require Yson.Macro.Value
+  import Yson.Macro.Value
 
   def echo_resolver(e), do: e
 

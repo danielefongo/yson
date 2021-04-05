@@ -3,7 +3,6 @@ defmodule Yson.JsonTest do
   require Yson.Json
   import Yson.Json
   import Function, only: [identity: 1]
-  alias Yson.Macro.Value
 
   defmodule Sample do
     use Yson.Json
@@ -39,17 +38,6 @@ defmodule Yson.JsonTest do
 
     def user(data), do: data
     def root(data), do: data
-  end
-
-  test "root" do
-    [first_value, second_value] =
-      root do
-        value(:foo)
-        value(:bar)
-      end
-
-    assert first_value == {Value, [:foo, &identity/1]}
-    assert second_value == {Value, [:bar, &identity/1]}
   end
 
   test "generate description" do

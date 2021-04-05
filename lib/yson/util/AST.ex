@@ -1,25 +1,5 @@
-defmodule Yson.Macro do
+defmodule Yson.Util.AST do
   @moduledoc false
-
-  defmacro __using__(_) do
-    quote do
-      require Yson.Macro
-      import Yson.Macro
-      import Function, only: [identity: 1]
-    end
-  end
-
-  def update_attributes(category, name, keywords) do
-    quote do
-      if :elixir_module.mode(__MODULE__) == :all do
-        data = Module.get_attribute(__MODULE__, unquote(category), [])
-        data = Keyword.put(data, unquote(name), unquote(keywords))
-        Module.put_attribute(__MODULE__, unquote(category), data)
-      end
-
-      unquote(keywords)
-    end
-  end
 
   def fetch(body, markers, rename_mapping \\ %{}) do
     body

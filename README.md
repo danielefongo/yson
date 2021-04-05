@@ -33,7 +33,7 @@ defmodule Person do
     end
   end
 
-  map :person do
+  root do
     value(:email)
 
     map :user, resolver: &Person.user/1 do

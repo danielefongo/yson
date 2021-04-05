@@ -1,8 +1,8 @@
 defmodule Yson.Macro.InterfaceTest do
   use ExUnit.Case
   alias Yson.Macro.{Interface, Value}
-  use Interface
-  use Value
+  require Yson.Macro.{Interface, Value}
+  import Yson.Macro.{Interface, Value}
 
   def echo_resolver(e), do: e
 

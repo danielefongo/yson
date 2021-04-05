@@ -2,6 +2,8 @@ defmodule Yson.GraphQLTest do
   use ExUnit.Case
   require Yson.GraphQL
   import Yson.GraphQL
+  require Yson.Macro.Arg
+  import Yson.Macro.Arg
   import Function, only: [identity: 1]
 
   defmodule Sample do
@@ -14,7 +16,7 @@ defmodule Yson.GraphQLTest do
       end
     end
 
-    map :sample do
+    root do
       reference(:user)
       reference(:data)
       reference(:natural_person)
@@ -39,26 +41,6 @@ defmodule Yson.GraphQLTest do
     end
 
     def user(data), do: data
-  end
-
-  test "query" do
-    obj =
-      query :sample do
-        arg(:one, :string)
-        arg(:two, :integer)
-      end
-
-    assert obj == %{one: :string, two: :integer}
-  end
-
-  test "mutation" do
-    obj =
-      mutation :sample do
-        arg(:one, :string)
-        arg(:two, :integer)
-      end
-
-    assert obj == %{one: :string, two: :integer}
   end
 
   test "generate description" do
