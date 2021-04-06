@@ -12,9 +12,10 @@ defmodule Yson.Macro.Map do
     fields = fetch(body, @allowed_macros, @mapping)
     resolver = Keyword.get(opts, :resolver, &Function.identity/1)
 
-    node = {Map, [name, resolver, fields]}
-
-    Reference.set_reference(module, name, node)
+    quote do
+      node = {Map, [unquote(name), unquote(resolver), unquote(fields)]}
+      Reference.set_reference(unquote(module), unquote(name), node)
+    end
   end
 
   defmacro nested_map(name, opts \\ [], do: body) do

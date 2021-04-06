@@ -160,5 +160,4 @@ You can choose one of the following key recasing:
 - `:no_case` does not convert payload keys before parsing
 
 ## Next steps
-[] import references from another Module
 [] json api

@@ -5,10 +5,10 @@ defmodule Yson.GraphQL do
 
   defmacro __using__(_) do
     quote do
-      require Yson.GraphQL
-      import Yson.GraphQL
-      require Yson.Macro.{Arg, Interface, Map, Query, Root, Reference, Value}
-      import Yson.Macro.{Arg, Interface, Map, Query, Root, Reference, Value}
+      use Yson.Schema
+
+      require Yson.Macro.{Query, Root}
+      import Yson.Macro.{Query, Root}
 
       @before_compile unquote(__MODULE__)
     end

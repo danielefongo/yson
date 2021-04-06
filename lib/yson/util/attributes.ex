@@ -27,16 +27,16 @@ defmodule Yson.Util.Attributes do
 
   def get(module, key) do
     if editable?(module) do
-      Module.get_attribute(module, key)
+      Module.get_attribute(module, key, [])
     else
-      module.__info__(:attributes)[key]
+      Keyword.get(module.__info__(:attributes), key, [])
     end
   end
 
   def get(module, key, sub_key) do
     module
     |> get(key)
-    |> Keyword.get(sub_key)
+    |> Keyword.get(sub_key, [])
   end
 
   defp editable?(module), do: :elixir_module.mode(module) == :all

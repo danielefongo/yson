@@ -4,10 +4,10 @@ defmodule Yson.Json do
 
   defmacro __using__(_) do
     quote do
-      require Yson.Json
-      import Yson.Json
-      require Yson.Macro.{Arg, Interface, Map, Root, Reference, Value}
-      import Yson.Macro.{Arg, Interface, Map, Root, Reference, Value}
+      use Yson.Schema
+
+      require Yson.Macro.Root
+      import Yson.Macro.Root
 
       @before_compile unquote(__MODULE__)
     end

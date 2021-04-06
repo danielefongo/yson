@@ -10,9 +10,10 @@ defmodule Yson.Macro.Interface do
     module = __CALLER__.module
     fields = fetch(body, @allowed_macros, @mapping)
 
-    node = {Interface, [name, fields]}
-
-    Reference.set_reference(module, name, node)
+    quote do
+      node = {Interface, [unquote(name), unquote(fields)]}
+      Reference.set_reference(unquote(module), unquote(name), node)
+    end
   end
 
   defmacro nested_interface(name, _opts \\ [], do: body) do
