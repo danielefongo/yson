@@ -1,13 +1,13 @@
-defmodule Yson.GraphQLTest do
+defmodule Yson.Schema.GraphQLTest do
   use ExUnit.Case
-  require Yson.GraphQL
-  import Yson.GraphQL
+  require Yson.Schema.GraphQL
+  import Yson.Schema.GraphQL
   require Yson.Macro.Arg
   import Yson.Macro.Arg
   import Function, only: [identity: 1]
 
   defmodule Sample do
-    use Yson.GraphQL
+    use Yson.Schema.GraphQL
 
     query :sample do
       arg :user do

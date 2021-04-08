@@ -1,11 +1,11 @@
-defmodule Yson.JsonTest do
+defmodule Yson.Schema.JsonTest do
   use ExUnit.Case
-  require Yson.Json
-  import Yson.Json
+  require Yson.Schema.Json
+  import Yson.Schema.Json
   import Function, only: [identity: 1]
 
   defmodule Sample do
-    use Yson.Json
+    use Yson.Schema.Json
 
     root resolver: &Sample.root/1 do
       value(:foo)

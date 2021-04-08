@@ -21,11 +21,11 @@ end
 ## GraphQL version
 ### Usage
 
-First create a `Yson.GraphQL` object:
+First create a `Yson.Schema.GraphQL` object:
 
 ``` elixir
 defmodule Person do
-  use Yson.GraphQL
+  use Yson.Schema.GraphQL
 
   query :person do # defines a query on map :person
     arg :user do
@@ -81,7 +81,7 @@ The result will be already mapped using resolvers, so it could be something like
 
 ### Custom usage
 
-The `Yson.GraphQL` object exposes two methods:
+The `Yson.Schema.GraphQL` object exposes two methods:
 - `&describe/0`, to build the object description.
 - `&resolvers/0`, to build the object resolvers tree.
 
@@ -116,11 +116,11 @@ iex> %{
 Actually there is no implemented Api module for Json version, but you can still parse responses.
 
 ### Define schema
-The first step is to define a `Yson.Json` schema.
+The first step is to define a `Yson.Schema.Json` schema.
 
 ```elixir
 defmodule Person do
-  use Yson.Json
+  use Yson.Schema.Json
 
   root do # defines the object root
     value(:email)

@@ -11,7 +11,7 @@ defmodule Yson.SchemaTest do
   end
 
   defmodule Sample2 do
-    use Yson.Json
+    use Yson.Schema.Json
 
     import_schema(Sample)
 
