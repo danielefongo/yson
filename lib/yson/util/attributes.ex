@@ -36,7 +36,7 @@ defmodule Yson.Util.Attributes do
   def get(module, key, sub_key) do
     module
     |> get(key)
-    |> Keyword.get(sub_key, [])
+    |> Keyword.get(sub_key)
   end
 
   defp editable?(module), do: :elixir_module.mode(module) == :all
