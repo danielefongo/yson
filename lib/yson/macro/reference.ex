@@ -8,8 +8,15 @@ defmodule Yson.Macro.Reference do
   def set_references(module, data), do: Attributes.set(module, :references, data)
   def get_references(module), do: Attributes.get(module, :references)
 
-  def set_reference(module, name, data), do: Attributes.set(module, :references, name, data)
-  def get_reference(module, name), do: Attributes.get(module, :references, name)
+  def set_reference(module, name, data) do
+    if exists?(module, name), do: raise("Reference #{name} already defined.")
+    Attributes.set(module, :references, name, data)
+  end
+
+  def get_reference(module, name) do
+    if not exists?(module, name), do: raise("Reference #{name} not defined.")
+    Attributes.get(module, :references, name)
+  end
 
   def describe([ref], map, module) do
     module
@@ -27,5 +34,9 @@ defmodule Yson.Macro.Reference do
 
   defp apply_nested({macro, data}, fun, module) do
     apply(macro, fun, [data, %{}, module])
+  end
+
+  defp exists?(module, name) do
+    not is_nil(Attributes.get(module, :references, name))
   end
 end

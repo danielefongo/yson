@@ -4,6 +4,7 @@ defmodule Yson.Util.AST do
   def fetch(body, markers, rename_mapping \\ %{}) do
     body
     |> ast_to_list()
+    |> validate(markers)
     |> find_valid_macros(markers)
     |> transform(rename_mapping)
   end
@@ -17,6 +18,14 @@ defmodule Yson.Util.AST do
 
   defp find_valid_macros(list, allowed),
     do: Enum.filter(list, fn {marker, _, _} -> Enum.member?(allowed, marker) end)
+
+  defp validate(list, allowed) do
+    invalid_macros? = Enum.any?(list, fn {marker, _, _} -> not Enum.member?(allowed, marker) end)
+
+    if invalid_macros?, do: raise("Only #{inspect(allowed)} macros are allowed.")
+
+    list
+  end
 
   defp transform(list, mapping),
     do:
