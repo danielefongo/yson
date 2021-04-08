@@ -76,7 +76,7 @@ defmodule Yson.Schema.GraphQLTest do
                   company_name: &identity/1,
                   first_name: &identity/1,
                   second_name: &identity/1,
-                  user: {&Yson.GraphQLTest.Sample.user/1, %{email: &identity/1}},
+                  user: {&Yson.Schema.GraphQLTest.Sample.user/1, %{email: &identity/1}},
                   data: {&identity/1, %{some_data: &identity/1}}
                 }}
            }
