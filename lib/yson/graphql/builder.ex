@@ -24,7 +24,7 @@ defmodule Yson.GraphQL.Builder do
     arg_keys = Map.keys(flat_arguments)
 
     if not Util.Map.has_keys?(variables, arg_keys) do
-      raise "Invalid variables: expected #{inspect(arg_keys)}, actual #{inspect(var_keys)}"
+      raise "Invalid variables: expected #{inspect(arg_keys)}, actual #{inspect(var_keys)}."
     end
 
     Util.Map.subset(variables, arg_keys)

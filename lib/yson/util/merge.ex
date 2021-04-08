@@ -20,7 +20,7 @@ defmodule Yson.Util.Merge do
         Enum.concat(first, second)
 
       _ ->
-        first
+        raise "Cannot merge a keyword list with different kind of data."
     end
   end
 
@@ -30,7 +30,7 @@ defmodule Yson.Util.Merge do
     conflicts = Enum.filter(keys1, fn key -> Enum.member?(keys2, key) end)
 
     if conflicts != [] do
-      raise "Found conflicts: #{inspect(conflicts)}"
+      raise "Found conflicts: #{inspect(conflicts)}."
     end
   end
 end

@@ -34,7 +34,7 @@ defmodule Yson.Parser do
       :snake -> to_snake(value)
       :camel -> to_camel(value)
       :no_case -> value
-      invalid_case -> raise "Invalid case: #{invalid_case}"
+      invalid_case -> raise "Invalid case: #{invalid_case}."
     end
   end
 end

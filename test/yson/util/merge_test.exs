@@ -22,4 +22,14 @@ defmodule Yson.Util.MergeTest do
     assert Merge.merge(:a, nil) == :a
     assert Merge.merge(nil, :a) == :a
   end
+
+  test "raise error when there are conflicts" do
+    assert_raise(RuntimeError, fn -> Merge.merge([:a], [:a]) end)
+    assert_raise(RuntimeError, fn -> Merge.merge([a: 1], a: 1) end)
+    assert_raise(RuntimeError, fn -> Merge.merge(%{a: 1}, %{a: 1}) end)
+  end
+
+  test "raise error when trying to merge keyword with a list" do
+    assert_raise(RuntimeError, fn -> Merge.merge([a: 1], [:a]) end)
+  end
 end

@@ -112,6 +112,15 @@ defmodule Yson.ParserTest do
     assert Parser.parse(resolvers, data, :no_case) == data
   end
 
+  test "raise error when parsing with wrong case" do
+    resolvers = %{sample: {&identity/1}}
+    data = %{sample: "foo"}
+
+    assert_raise(RuntimeError, fn ->
+      Parser.parse(resolvers, data, :wrong_case) == data
+    end)
+  end
+
   test "parse combining resolvers" do
     resolvers = %{
       sample: {&collapse_name/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
