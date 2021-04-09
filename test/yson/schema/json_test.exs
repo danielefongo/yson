@@ -60,7 +60,7 @@ defmodule Yson.Schema.JsonTest do
   test "generate resolvers" do
     assert Sample.resolvers() ==
              {
-               &Yson.JsonTest.Sample.root/1,
+               &Yson.Schema.JsonTest.Sample.root/1,
                %{
                  foo: &identity/1,
                  sample:
@@ -69,7 +69,7 @@ defmodule Yson.Schema.JsonTest do
                       company_name: &identity/1,
                       first_name: &identity/1,
                       second_name: &identity/1,
-                      user: {&Yson.JsonTest.Sample.user/1, %{email: &identity/1}},
+                      user: {&Yson.Schema.JsonTest.Sample.user/1, %{email: &identity/1}},
                       data: {&identity/1, %{some_data: &identity/1}}
                     }}
                }
