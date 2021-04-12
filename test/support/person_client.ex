@@ -1,6 +1,6 @@
 defmodule Support.PersonClient do
   @moduledoc false
-  use Yson.Schema.GraphQL
+  use Yson.GraphQL.Schema
 
   import_schema(Support.PersonSchema)
 

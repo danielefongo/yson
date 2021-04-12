@@ -1,4 +1,4 @@
-defmodule Yson.Schema.Json do
+defmodule Yson.Json.Schema do
   @moduledoc false
   require Yson.Macro.Root
 

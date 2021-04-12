@@ -1,18 +1,18 @@
-defmodule Yson.Schema.JsonTest do
+defmodule Yson.GraphQL.SchemaTest do
   use ExUnit.Case
-  require Yson.Schema.Json
-  import Yson.Schema.Json
   import Function, only: [identity: 1]
 
   defmodule Sample do
-    use Yson.Schema.Json
+    use Yson.GraphQL.Schema
 
-    root resolver: &Sample.root/1 do
-      value(:foo)
-      reference(:sample)
+    query :sample do
+      arg :user do
+        arg(:email, :string)
+        arg(:age, :integer)
+      end
     end
 
-    map :sample do
+    root do
       reference(:user)
       reference(:data)
       reference(:natural_person)
@@ -37,14 +37,14 @@ defmodule Yson.Schema.JsonTest do
     end
 
     def user(data), do: data
-    def root(data), do: data
   end
 
   test "generate description" do
     description = Sample.describe()
 
-    assert description == %{
-             foo: nil,
+    assert description.object == :sample
+
+    assert description.body == %{
              sample: %{
                user: %{email: nil},
                data: %{some_data: nil},
@@ -55,24 +55,26 @@ defmodule Yson.Schema.JsonTest do
                legal_person: [company_name: nil]
              }
            }
+
+    assert description.arguments == %{
+             user: %{
+               email: :string,
+               age: :integer
+             }
+           }
   end
 
   test "generate resolvers" do
-    assert Sample.resolvers() ==
-             {
-               &Yson.Schema.JsonTest.Sample.root/1,
-               %{
-                 foo: &identity/1,
-                 sample:
-                   {&identity/1,
-                    %{
-                      company_name: &identity/1,
-                      first_name: &identity/1,
-                      second_name: &identity/1,
-                      user: {&Yson.Schema.JsonTest.Sample.user/1, %{email: &identity/1}},
-                      data: {&identity/1, %{some_data: &identity/1}}
-                    }}
-               }
-             }
+    assert Sample.resolvers() == %{
+             sample:
+               {&identity/1,
+                %{
+                  company_name: &identity/1,
+                  first_name: &identity/1,
+                  second_name: &identity/1,
+                  user: {&Yson.GraphQL.SchemaTest.Sample.user/1, %{email: &identity/1}},
+                  data: {&identity/1, %{some_data: &identity/1}}
+                }}
+           }
   end
 end

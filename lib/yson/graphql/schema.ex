@@ -1,4 +1,4 @@
-defmodule Yson.Schema.GraphQL do
+defmodule Yson.GraphQL.Schema do
   @moduledoc false
   require Yson.Macro.Root
   require Yson.Macro.Query
