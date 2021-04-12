@@ -5,23 +5,23 @@ defmodule Yson.Parser do
 
   def parse(resolvers, data, to_case \\ :no_case), do: inner_parse(resolvers, data, to_case)
 
-  def inner_parse(resolvers, data, to_case) when is_map(resolvers) and is_map(data) do
+  defp inner_parse(resolvers, data, to_case) when is_map(resolvers) and is_map(data) do
     inner_parse_nested_map(resolvers, data, to_case)
   end
 
-  def inner_parse({resolver, resolvers}, data, to_case) when is_map(data) do
+  defp inner_parse({resolver, resolvers}, data, to_case) when is_map(data) do
     resolvers
     |> inner_parse_nested_map(data, to_case)
     |> resolver.()
   end
 
-  def inner_parse(resolver, data, to_case) when is_list(data) do
+  defp inner_parse(resolver, data, to_case) when is_list(data) do
     map(data, &inner_parse(resolver, &1, to_case))
   end
 
-  def inner_parse(resolver, data, _to_case), do: resolver.(data)
+  defp inner_parse(resolver, data, _to_case), do: resolver.(data)
 
-  def inner_parse_nested_map(resolvers, data, to_case) do
+  defp inner_parse_nested_map(resolvers, data, to_case) do
     data
     |> map(fn {key, val} -> {recase(key, to_case), val} end)
     |> filter(fn {key, _} -> not is_nil(Map.get(resolvers, key)) end)

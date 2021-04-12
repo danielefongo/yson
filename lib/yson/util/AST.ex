@@ -16,16 +16,18 @@ defmodule Yson.Util.AST do
     end
   end
 
-  defp find_valid_macros(list, allowed),
-    do: Enum.filter(list, fn {marker, _, _} -> Enum.member?(allowed, marker) end)
+  defp find_valid_macros(list, allowed), do: Enum.filter(list, &validate_single(&1, allowed))
 
   defp validate(list, allowed) do
-    invalid_macros? = Enum.any?(list, fn {marker, _, _} -> not Enum.member?(allowed, marker) end)
-
-    if invalid_macros?, do: raise("Only #{inspect(allowed)} macros are allowed.")
+    if not Enum.all?(list, &validate_single(&1, allowed)) do
+      raise("Only #{inspect(allowed)} macros are allowed.")
+    end
 
     list
   end
+
+  defp validate_single({marker, _, _}, allowed), do: Enum.member?(allowed, marker)
+  defp validate_single(_, _), do: false
 
   defp transform(list, mapping),
     do:

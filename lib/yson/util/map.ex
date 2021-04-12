@@ -18,7 +18,7 @@ defmodule Yson.Util.Map do
     |> to_flat_map(%{})
   end
 
-  def to_flat_map([{_k, %{} = v} | t], acc), do: to_flat_map(Map.to_list(v), to_flat_map(t, acc))
-  def to_flat_map([{k, v} | t], acc), do: to_flat_map(t, Map.put_new(acc, k, v))
-  def to_flat_map([], acc), do: acc
+  defp to_flat_map([{_k, %{} = v} | t], acc), do: to_flat_map(Map.to_list(v), to_flat_map(t, acc))
+  defp to_flat_map([{k, v} | t], acc), do: to_flat_map(t, Map.put_new(acc, k, v))
+  defp to_flat_map([], acc), do: acc
 end

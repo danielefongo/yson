@@ -30,7 +30,7 @@ defmodule Yson.GraphQL.Builder do
     Util.Map.subset(variables, arg_keys)
   end
 
-  def build_query(arguments, kind) do
+  defp build_query(arguments, kind) do
     case inner_build_query(arguments) do
       "" -> "#{camel(kind)}"
       content -> "#{camel(kind)} (#{content})"
@@ -47,7 +47,7 @@ defmodule Yson.GraphQL.Builder do
 
   defp inner_build_query({_, value}) when is_map(value), do: inner_build_query(value)
 
-  def build_arguments(method, data) when is_map(data) do
+  defp build_arguments(method, data) when is_map(data) do
     case inner_build_arguments(data) do
       "" -> camel(method)
       content -> "#{method}(#{content})"
@@ -67,18 +67,18 @@ defmodule Yson.GraphQL.Builder do
     "#{camel(key)}: {#{inner}}"
   end
 
-  def build_body(data) when is_map(data), do: inner_build_body(data)
+  defp build_body(data) when is_map(data), do: inner_build_body(data)
 
-  def inner_build_body(data) when is_map(data), do: Enum.map(data, &inner_build_body/1)
+  defp inner_build_body(data) when is_map(data), do: Enum.map(data, &inner_build_body/1)
 
-  def inner_build_body({key, value}) when is_nil(value), do: [camel(key)]
+  defp inner_build_body({key, value}) when is_nil(value), do: [camel(key)]
 
-  def inner_build_body({key, value}) when is_map(value) do
+  defp inner_build_body({key, value}) when is_map(value) do
     inner = Enum.map(value, &inner_build_body/1)
     ["#{key} {"] ++ inner ++ ["}"]
   end
 
-  def inner_build_body({key, value}) when is_list(value) do
+  defp inner_build_body({key, value}) when is_list(value) do
     inner = value |> Enum.into(%{}) |> Enum.map(&inner_build_body/1)
     ["... on #{pascal(key)} {"] ++ inner ++ ["}"]
   end
