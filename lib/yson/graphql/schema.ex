@@ -69,7 +69,7 @@ defmodule Yson.GraphQL.Schema do
     end
   end
 
-  def kind(module), do: Attributes.get(module, :kind)
-  def object(module), do: Attributes.get(module, :object)
-  def arguments(module), do: module |> Attributes.get(:arguments) |> Enum.into(%{})
+  defp kind(module), do: Attributes.get(module, :kind)
+  defp object(module), do: Attributes.get(module, :object)
+  defp arguments(module), do: module |> Attributes.get(:arguments) |> Enum.into(%{})
 end

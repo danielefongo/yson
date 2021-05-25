@@ -1,4 +1,5 @@
 defmodule Yson.Util.Reference do
+  @moduledoc false
   alias Yson.Util.Attributes
 
   def set_references(module, data), do: Attributes.set(module, :references, data)
