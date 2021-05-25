@@ -1,13 +1,9 @@
 defmodule Yson.Json.Schema do
   @moduledoc false
-  require Yson.Macro.Root
 
   defmacro __using__(_) do
     quote do
       use Yson.Schema
-
-      require Yson.Macro.Root
-      import Yson.Macro.Root
 
       @before_compile unquote(__MODULE__)
     end
@@ -16,8 +12,8 @@ defmodule Yson.Json.Schema do
   defmacro __before_compile__(_env) do
     module = __CALLER__.module
 
-    body = Yson.Macro.Root.describe(module)
-    resolvers = Yson.Macro.Root.resolvers(module)
+    body = Yson.Schema.describe(module)
+    resolvers = Yson.Schema.resolvers(module)
 
     quote do
       def describe, do: unquote(Macro.escape(body))

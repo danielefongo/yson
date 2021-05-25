@@ -1,14 +1,16 @@
 defmodule Yson.GraphQL.Schema do
   @moduledoc false
-  require Yson.Macro.Root
-  require Yson.Macro.Query
+  import Yson.Util.AST
+  alias Yson.Util.Attributes
+
+  @allowed_macros [:arg]
 
   defmacro __using__(_) do
     quote do
       use Yson.Schema
 
-      require Yson.Macro.{Query, Root}
-      import Yson.Macro.{Query, Root}
+      require Yson.GraphQL.Schema
+      import Yson.GraphQL.Schema
 
       @before_compile unquote(__MODULE__)
     end
@@ -17,12 +19,12 @@ defmodule Yson.GraphQL.Schema do
   defmacro __before_compile__(_env) do
     module = __CALLER__.module
 
-    object = Yson.Macro.Query.object(module)
-    kind = Yson.Macro.Query.kind(module)
-    arguments = Yson.Macro.Query.arguments(module)
+    object = object(module)
+    kind = kind(module)
+    arguments = arguments(module)
 
-    body = Map.put(%{}, object, Yson.Macro.Root.describe(module))
-    resolvers = Map.put(%{}, object, Yson.Macro.Root.resolvers(module))
+    body = Map.put(%{}, object, Yson.Schema.describe(module))
+    resolvers = Map.put(%{}, object, Yson.Schema.resolvers(module))
 
     quote do
       def describe,
@@ -36,4 +38,38 @@ defmodule Yson.GraphQL.Schema do
       def resolvers, do: unquote(Macro.escape(resolvers))
     end
   end
+
+  defmacro arg(name, type) when is_atom(type) do
+    quote do: {unquote(name), unquote(type)}
+  end
+
+  defmacro arg(name, _opts \\ [], do: body) do
+    args = fetch(body, @allowed_macros)
+
+    quote do: {unquote(name), Enum.into(unquote(args), %{})}
+  end
+
+  defmacro query(name, _opts \\ [], do: body),
+    do: request(__CALLER__.module, name, :query, body)
+
+  defmacro mutation(name, _opts \\ [], do: body),
+    do: request(__CALLER__.module, name, :mutation, body)
+
+  defp request(module, name, kind, body) do
+    body = fetch(body, @allowed_macros)
+
+    quote do
+      Attributes.set(unquote(module),
+        kind: unquote(kind),
+        object: unquote(name),
+        arguments: unquote(body)
+      )
+
+      Enum.into(unquote(body), %{})
+    end
+  end
+
+  def kind(module), do: Attributes.get(module, :kind)
+  def object(module), do: Attributes.get(module, :object)
+  def arguments(module), do: module |> Attributes.get(:arguments) |> Enum.into(%{})
 end
