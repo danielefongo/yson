@@ -1,5 +1,39 @@
 defmodule Yson.Schema do
-  @moduledoc false
+  @moduledoc """
+  Defines a Yson Schema that can be included other schemas.
+
+  It is the base of high level schemas like `Yson.GraphQL.Schema` and `Yson.Json.Schema`, and contains useful macros to build up Schema description and resolvers tree.
+
+      defmodule Person do
+        use Yson.Schema
+
+        root do
+          map :address do
+            value(:street)
+            value(:city)
+          end
+
+          value(:name)
+        end
+      end
+
+  Deep nesting is allowed but it always possible to move a block outside and reference it with `reference/1`. The previous example could be changed as follows:
+
+      defmodule Person do
+        use Yson.Schema
+
+        root do
+          reference(:address)
+          value(:name)
+        end
+
+        map :address do
+          value(:street)
+          value(:city)
+        end
+      end
+  """
+
   alias Yson.Util.Attributes
   alias Yson.Util.Merge
   alias Yson.Util.Reference
@@ -16,6 +50,28 @@ defmodule Yson.Schema do
     end
   end
 
+  @doc """
+  Imports schema types from another `Yson.Schema` module.
+
+  ### Examples
+      defmodule Base do
+        use Yson.Schema
+
+        map :user do
+          value(:name)
+        end
+      end
+
+      defmodule Extension do
+        use Yson.Schema
+
+        import_schema(Base)
+
+        root do
+          reference(:user)
+        end
+      end
+  """
   defmacro import_schema(module_from) do
     module_to = __CALLER__.module
 
@@ -28,6 +84,25 @@ defmodule Yson.Schema do
     end
   end
 
+  @doc """
+  Defines the root of the schema.
+
+  It contains the schema tree and must be defined.
+  A root field could be a value, a map, an interface or a reference.
+
+  ### Examples
+      root do
+        value(:name)
+      end
+
+  You can also specify custom resolver to parse data.
+
+  ### Example
+      reverse_name = fn %{name: name} -> %{name: String.reverse(name)} end
+      root resolver: &reverse_name/1 do
+        value(:name)
+      end
+  """
   defmacro root(opts \\ [], do: body) do
     module = __CALLER__.module
     fields = get_fields(body)
@@ -38,10 +113,41 @@ defmodule Yson.Schema do
     end
   end
 
+  @doc """
+  References a map or an interface by name.
+
+  The referenced map/interface should be defined outside the `root/2` macro scope.
+
+  ### Example
+      root do
+        reference(:referenced)
+      end
+
+      map :referenced do
+        value(:name)
+      end
+  """
   defmacro reference(reference), do: {:reference, reference}
 
+  @doc """
+  Defines a simple field.
+
+  ### Example
+      value(:referenced)
+  """
   defmacro value(name, resolver \\ quote(do: &identity/1)), do: {:value, [name, resolver]}
 
+  @doc """
+  Defines a interface.
+
+  It contains virtual fields that will be automatically mapped on parent node as children.
+  An interface field could be a value, a map, an interface or a reference.
+
+  ### Example
+      interface :address do
+        value(:city)
+      end
+  """
   defmacro interface(name, _opts \\ [], do: body) do
     module = __CALLER__.module
     fields = get_fields(body)
@@ -52,12 +158,31 @@ defmodule Yson.Schema do
     end
   end
 
+  @doc false
   defmacro nested_interface(name, _opts \\ [], do: body) do
     fields = get_fields(body)
 
     {:interface, [name, fields]}
   end
 
+  @doc """
+  Defines a map.
+
+  A map field could be a value, a map, an interface or a reference.
+
+  ### Example
+      map :person do
+        value(:name)
+      end
+
+  You can also specify custom resolver to parse data.
+
+  ### Example
+      reverse_name = fn %{name: name} -> %{name: String.reverse(name)} end
+      map :person, resolver: &reverse_name/1 do
+        value(:name)
+      end
+  """
   defmacro map(name, opts \\ [], do: body) do
     module = __CALLER__.module
     fields = get_fields(body)
@@ -69,6 +194,7 @@ defmodule Yson.Schema do
     end
   end
 
+  @doc false
   defmacro nested_map(name, opts \\ [], do: body) do
     fields = get_fields(body)
     resolver = get_resolver(opts)
@@ -76,12 +202,14 @@ defmodule Yson.Schema do
     {:map, [name, resolver, fields]}
   end
 
+  @doc false
   def describe(module) do
     [_, description] = Attributes.get(module, :root)
 
     Enum.reduce(description, %{}, fn data, m -> describe(data, m, module) end)
   end
 
+  @doc false
   def resolvers(module) do
     [resolver, description] = Attributes.get(module, :root)
 

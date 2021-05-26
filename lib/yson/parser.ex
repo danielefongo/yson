@@ -1,8 +1,32 @@
 defmodule Yson.Parser do
-  @moduledoc false
+  @moduledoc """
+  Defines the Json/GraphQL response parser.
+
+      iex> Yson.Parser.parse(ASchema.resolvers(), payload)
+      iex> %{
+        schema: %{
+          some_data: []
+        }
+      }
+
+  Response extra fields are ignored and missing fields are not mapped in parsed response.
+  """
   import Enum
   import Recase
 
+  @doc """
+  Parse the response.
+
+  The first parameter is a `Yson.GraphQL.Schema` resolvers tree, the second one is the response payload, the third one is an optional recasing option.
+
+  ### Example
+      parse(ASchema.resolvers(), %{responseData: "value"})
+
+  The optional third parameter can be one of the following:
+    - `:snake` converts payload keys to snake case before parsing
+    - `:camel` converts payload keys to camel case before parsing
+    - `:no_case` does not convert payload keys before parsing
+  """
   def parse(resolvers, data, to_case \\ :no_case), do: inner_parse(resolvers, data, to_case)
 
   defp inner_parse(resolvers, data, to_case) when is_map(resolvers) and is_map(data) do

@@ -42,12 +42,10 @@ defmodule Person do
         value(:last_name)
       end
 
-      reference(:legal_person)
+      interface :legal_person do
+        value(:company_name)
+      end
     end
-  end
-
-  interface :legal_person do
-    value(:company_name)
   end
 
   def user(%{company_name: name}), do: %{full_name: name}
@@ -85,11 +83,11 @@ The `Yson.GraphQL.Schema` object exposes two methods:
 - `&describe/0`, to build the object description.
 - `&resolvers/0`, to build the object resolvers tree.
 
-that can be combined with the modules `Yson.Builder` and `Yson.Parser`.
+that can be combined with the modules `Yson.GraphQL.Builder` and `Yson.Parser`.
 
 #### Create query
 
-`&Yson.GraphQL.Builder.build/2` accepts a Yson description and the variables. A usage can be the following:
+`Yson.GraphQL.Builder.build/2` accepts a Yson description and the variables. A usage can be the following:
 ```elixir
 iex> Yson.GraphQL.Builder.build(Person.describe(), variables)
 iex> %{
@@ -99,7 +97,7 @@ iex> %{
 ```
 
 #### Parse response
-`&Yson.Parser.parse/2` accepts a Yson resolvers tree and the payload (map with atom keys). A usage can be the following:
+`Yson.Parser.parse/3` accepts a Yson resolvers tree and the payload (map with atom keys). A usage can be the following:
 ```elixir
 iex> Yson.Parser.parse(Person.resolvers(), payload)
 iex> %{
@@ -146,7 +144,7 @@ end
 ```
 
 ### Parse response
-`&Yson.Parser.parse/2` accepts a Yson resolvers tree and the payload (map with atom keys). A usage can be the following:
+`Yson.Parser.parse/3` accepts a Yson resolvers tree and the payload (map with atom keys). A usage can be the following:
 ```elixir
 iex> payload = %{email: "a@b.c", user: %{companyName: "legal name"}}
 iex> recase = :snake

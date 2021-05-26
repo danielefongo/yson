@@ -1,8 +1,46 @@
 defmodule Yson.GraphQL.Builder do
-  @moduledoc false
+  @moduledoc """
+  Defines the GraphQL request builder.
+
+      iex> variables = %{key: "value"}
+      iex> Yson.GraphQL.Builder.build(ASchema.describe(), variables)
+      iex> %{
+        query: "query ($key: String) ...",
+        variables: %{key: "value"}
+      }
+  """
+
   alias Yson.Util
 
-  def build(%{kind: kind, object: object, arguments: arguments, body: body}, variables) do
+  @doc """
+  Builds the request.
+
+  The first parameter is a `Yson.GraphQL.Schema` description, while the second parameter is a map of variables.
+
+  ### Example
+      build(ASchema.describe(), %{key: "value"})
+
+  You can pass a shallow map of variables even if you specified deep args on `Yson.GraphQL.Schema.query/3` or `Yson.GraphQL.Schema.mutation/3`.
+
+  ### Example
+      defmodule Person do
+        use Yson.GraphQL.Schema
+
+        query :person do
+          arg :addresso do
+            arg(:street, :string)
+          end
+        end
+
+        # ...
+      end
+
+      # ...
+      build(Person.describe(), %{street: "a street"})
+  """
+  def build(description, variables) do
+    %{kind: kind, object: object, arguments: arguments, body: body} = description
+
     variables = fetch_variables(variables, arguments)
 
     query =

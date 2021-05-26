@@ -1,6 +1,9 @@
 defmodule Yson.Builder.MixProject do
   use Mix.Project
 
+  @github "https://github.com/danielefongo/yson"
+  @version "0.1.0"
+
   def project do
     [
       app: :yson,
@@ -16,6 +19,12 @@ defmodule Yson.Builder.MixProject do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test
+      ],
+      docs: [
+        main: "readme",
+        extras: ["README.md", "LICENSE"],
+        source_ref: "v#{@version}",
+        source_url: @github
       ]
     ]
   end
@@ -33,6 +42,7 @@ defmodule Yson.Builder.MixProject do
       {:httpoison, "~> 1.7"},
       {:jason, "~> 1.2.2"},
       {:recase, "~> 0.5"},
+      {:ex_doc, "~> 0.24.2"},
       {:absinthe, "~> 1.6", only: :test},
       {:bypass, "~> 2.1.0-rc.0", only: :test},
       {:credo, "~> 1.4.1", only: [:dev, :test]},
