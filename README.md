@@ -18,12 +18,15 @@ def deps do
 end
 ```
 
-## GraphQL version
-### Usage
+## Usage
+
+`yson` can be used both to run GraphQL requests and to parse JSON responses.
+
+### GraphQL
 
 First create a `Yson.GraphQL.Schema` object:
 
-``` elixir
+```elixir
 defmodule Person do
   use Yson.GraphQL.Schema
 
@@ -53,7 +56,7 @@ defmodule Person do
 end
 ```
 
-Then do a request to your graphql endpoint using `Yson.GraphQL.Api`:
+Then run a Graphql request using `Yson.GraphQL.Api`:
 
 ```elixir
 alias Yson.GraphQL.Api
@@ -77,17 +80,19 @@ The result will be already mapped using resolvers, so it could be something like
 }
 ```
 
-### Custom usage
+#### Custom usage
 
 The `Yson.GraphQL.Schema` object exposes two methods:
+
 - `&describe/0`, to build the object description.
 - `&resolvers/0`, to build the object resolvers tree.
 
 that can be combined with the modules `Yson.GraphQL.Builder` and `Yson.Parser`.
 
-#### Create query
+##### Create query
 
-`Yson.GraphQL.Builder.build/2` accepts a Yson description and the variables. A usage can be the following:
+`Yson.GraphQL.Builder.build/2` accepts a Yson description and the variables. It can be used as follows:
+
 ```elixir
 iex> Yson.GraphQL.Builder.build(Person.describe(), variables)
 iex> %{
@@ -96,8 +101,10 @@ iex> %{
 }
 ```
 
-#### Parse response
-`Yson.Parser.parse/3` accepts a Yson resolvers tree and the payload (map with atom keys). A usage can be the following:
+##### Parse response
+
+`Yson.Parser.parse/3` accepts a Yson resolvers tree and the payload (map with atom keys). It can be used as follows:
+
 ```elixir
 iex> Yson.Parser.parse(Person.resolvers(), payload)
 iex> %{
@@ -110,10 +117,12 @@ iex> %{
 }
 ```
 
-## Json version
-Actually there is no implemented Api module for Json version, but you can still parse responses.
+### JSON
 
-### Define schema
+Currently there is no implemented `Api` module for running Json requests, but it is still possible to use `yson` to parse responses.
+
+#### Define schema
+
 The first step is to define a `Yson.Json.Schema` schema.
 
 ```elixir
@@ -143,8 +152,10 @@ defmodule Person do
 end
 ```
 
-### Parse response
-`Yson.Parser.parse/3` accepts a Yson resolvers tree and the payload (map with atom keys). A usage can be the following:
+#### Parse response
+
+`Yson.Parser.parse/3` accepts a Yson resolvers tree and the payload (map with atom keys). It can be used as follows:
+
 ```elixir
 iex> payload = %{email: "a@b.c", user: %{companyName: "legal name"}}
 iex> recase = :snake
@@ -152,10 +163,12 @@ iex> Yson.Parser.parse(Person.resolvers(), payload, recase)
 iex> %{email: "a@b.c", user: %{full_name: "legal name"}}
 ```
 
-You can choose one of the following key recasing:
-- `:snake` converts payload keys to snake case before parsing
-- `:camel` converts payload keys to camel case before parsing
-- `:no_case` does not convert payload keys before parsing
+The available strategies for key recasing are:
+
+- `:snake` to convert payload keys to snake case before parsing
+- `:camel` to convert payload keys to camel case before parsing
+- `:no_case` to preserve the original casing
 
 ## Next steps
+
 [] json api
