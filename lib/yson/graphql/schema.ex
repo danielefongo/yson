@@ -23,8 +23,8 @@ defmodule Yson.GraphQL.Schema do
       end
 
   After the definition, a GraphQL Schema exposes two methods:
-  - `describe/0`, to build the object description. It could be used with `Yson.GraphQL.Builder.build/2` to create GraphQL request.
-  - `resolvers/0`, to build the object resolvers tree. It could be used with `Yson.Parser.parse/3` to parse GraphQL response.
+  - `describe/0`, to build the object description. It can be used with `Yson.GraphQL.Builder.build/2` to create a GraphQL request.
+  - `resolvers/0`, to build the object resolvers tree. It can be used with `Yson.Parser.parse/3` to parse a GraphQL response.
   """
 
   import Yson.Util.AST

@@ -13,7 +13,7 @@ defmodule Yson.GraphQL.Api do
   alias Yson.Parser
 
   @doc """
-  Execute the GraphQL request and return a parsed response or an error.
+  Executes the GraphQL request and returns a parsed response or an error.
 
   ### Example
       run(ASchema, %{var1: "value"})

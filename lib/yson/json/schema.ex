@@ -20,7 +20,7 @@ defmodule Yson.Json.Schema do
 
   After the definition, a Json Schema exposes two methods:
   - `describe/0`, to build the object description.
-  - `resolvers/0`, to build the object resolvers tree. It could be used with `Yson.Parser.parse/3` to parse json response.
+  - `resolvers/0`, to build the object resolvers tree. It can be used with `Yson.Parser.parse/3` to parse json response.
   """
 
   defmacro __using__(_) do

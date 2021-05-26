@@ -15,7 +15,7 @@ defmodule Yson.Parser do
   import Recase
 
   @doc """
-  Parse the response.
+  Parses the response.
 
   The first parameter is a `Yson.GraphQL.Schema` resolvers tree, the second one is the response payload, the third one is an optional recasing option.
 
