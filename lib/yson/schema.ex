@@ -36,7 +36,6 @@ defmodule Yson.Schema do
 
   alias Yson.Util.Attributes
   alias Yson.Util.Merge
-  alias Yson.Util.Reference
   import Yson.Util.AST
   import Function, only: [identity: 1]
 
@@ -77,10 +76,10 @@ defmodule Yson.Schema do
 
     quote do
       require unquote(module_from)
-      first_data = Reference.get_references(unquote(module_from))
-      second_data = Reference.get_references(unquote(module_to))
+      first_data = Attributes.get(unquote(module_from), :references)
+      second_data = Attributes.get(unquote(module_to), :references)
 
-      Reference.set_references(unquote(module_to), Merge.merge(first_data, second_data))
+      Attributes.set(unquote(module_to), :references, Merge.merge(first_data, second_data))
     end
   end
 
@@ -109,7 +108,7 @@ defmodule Yson.Schema do
     resolver = get_resolver(opts)
 
     quote do
-      Attributes.set(unquote(module), :root, [unquote(resolver), unquote(fields)])
+      Attributes.set!(unquote(module), :root, [unquote(resolver), unquote(fields)])
     end
   end
 
@@ -154,7 +153,7 @@ defmodule Yson.Schema do
 
     quote do
       node = {:interface, [unquote(name), unquote(fields)]}
-      Reference.set_reference(unquote(module), unquote(name), node)
+      Attributes.set!(unquote(module), :references, unquote(name), node)
     end
   end
 
@@ -190,7 +189,7 @@ defmodule Yson.Schema do
 
     quote do
       node = {:map, [unquote(name), unquote(resolver), unquote(fields)]}
-      Reference.set_reference(unquote(module), unquote(name), node)
+      Attributes.set!(unquote(module), :references, unquote(name), node)
     end
   end
 
@@ -204,14 +203,14 @@ defmodule Yson.Schema do
 
   @doc false
   def describe(module) do
-    [_, description] = Attributes.get(module, :root)
+    [_, description] = Attributes.get!(module, :root)
 
     Enum.reduce(description, %{}, fn data, m -> describe(data, m, module) end)
   end
 
   @doc false
   def resolvers(module) do
-    [resolver, description] = Attributes.get(module, :root)
+    [resolver, description] = Attributes.get!(module, :root)
 
     resolvers = Enum.reduce(description, %{}, fn data, m -> resolver(data, m, module) end)
 
@@ -220,7 +219,7 @@ defmodule Yson.Schema do
 
   defp describe({:reference, ref}, map, module) do
     module
-    |> Reference.get_reference(ref)
+    |> Attributes.get!(:references, ref)
     |> describe(%{}, module)
     |> Map.merge(map)
   end
@@ -258,7 +257,7 @@ defmodule Yson.Schema do
 
   defp resolver({:reference, ref}, map, module) do
     module
-    |> Reference.get_reference(ref)
+    |> Attributes.get!(:references, ref)
     |> resolver(%{}, module)
     |> Map.merge(map)
   end

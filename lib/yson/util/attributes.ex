@@ -1,8 +1,19 @@
 defmodule Yson.Util.Attributes do
   @moduledoc false
 
+  def set!(module, keywords) do
+    Enum.each(keywords, fn {key, value} -> set!(module, key, value) end)
+  end
+
   def set(module, keywords) do
     Enum.each(keywords, fn {key, value} -> set(module, key, value) end)
+  end
+
+  def set!(module, key, value) do
+    case get(module, key) do
+      nil -> set(module, key, value)
+      _ -> raise "#{key} already defined."
+    end
   end
 
   def set(module, key, value) do
@@ -12,6 +23,13 @@ defmodule Yson.Util.Attributes do
     end
 
     value
+  end
+
+  def set!(module, key, sub_key, value) do
+    case get(module, key, sub_key) do
+      nil -> set(module, key, sub_key, value)
+      _ -> raise "#{sub_key} already defined in #{key}."
+    end
   end
 
   def set(module, key, sub_key, value) do
@@ -25,11 +43,25 @@ defmodule Yson.Util.Attributes do
     value
   end
 
+  def get!(module, key) do
+    case get(module, key) do
+      nil -> raise "#{key} not found."
+      value -> value
+    end
+  end
+
   def get(module, key) do
     if editable?(module) do
       Module.get_attribute(module, key)
     else
       Keyword.get(module.__info__(:attributes), key)
+    end
+  end
+
+  def get!(module, key, sub_key) do
+    case get(module, key, sub_key) do
+      nil -> raise "#{sub_key} not found in #{key}."
+      value -> value
     end
   end
 
