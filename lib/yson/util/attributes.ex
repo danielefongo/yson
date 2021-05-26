@@ -9,6 +9,8 @@ defmodule Yson.Util.Attributes do
     Enum.each(keywords, fn {key, value} -> set(module, key, value) end)
   end
 
+  def set!(_module, _key, nil), do: nil
+
   def set!(module, key, value) do
     case get(module, key) do
       nil -> set(module, key, value)
@@ -24,6 +26,8 @@ defmodule Yson.Util.Attributes do
 
     value
   end
+
+  def set!(_module, _key, _sub_key, nil), do: nil
 
   def set!(module, key, sub_key, value) do
     case get(module, key, sub_key) do

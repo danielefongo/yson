@@ -4,27 +4,52 @@ defmodule Yson.SchemaTest do
   import Function, only: [identity: 1]
   import Support.Macro
 
-  test "extend references" do
-    defmodule Base do
-      use Yson.Schema
+  describe "import schema" do
+    test "references" do
+      defmodule ReferencesBase do
+        use Yson.Schema
 
-      map :foo do
-        value(:one)
+        map :foo do
+          value(:one)
+        end
       end
+
+      defmodule ReferencesExtended do
+        use Yson.Schema
+
+        import_schema(ReferencesBase)
+
+        root do
+          reference(:foo)
+          value(:bar)
+        end
+      end
+
+      assert describe(ReferencesExtended) == %{bar: nil, foo: %{one: nil}}
     end
 
-    defmodule Extended do
-      use Yson.Schema
+    test "root" do
+      defmodule RootBase do
+        use Yson.Schema
 
-      import_schema(Base)
+        map :foo do
+          value(:one)
+        end
 
-      root do
-        reference(:foo)
-        value(:bar)
+        root do
+          reference(:foo)
+          value(:bar)
+        end
       end
-    end
 
-    assert describe(Extended) == %{bar: nil, foo: %{one: nil}}
+      defmodule RootExtended do
+        use Yson.Schema
+
+        import_schema(RootBase)
+      end
+
+      assert describe(RootExtended) == %{bar: nil, foo: %{one: nil}}
+    end
   end
 
   describe "interface" do

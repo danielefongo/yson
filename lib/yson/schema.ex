@@ -76,10 +76,15 @@ defmodule Yson.Schema do
 
     quote do
       require unquote(module_from)
-      first_data = Attributes.get(unquote(module_from), :references)
-      second_data = Attributes.get(unquote(module_to), :references)
 
-      Attributes.set(unquote(module_to), :references, Merge.merge(first_data, second_data))
+      first_root = Attributes.get(unquote(module_from), :root)
+      second_root = Attributes.get(unquote(module_to), :root)
+      Attributes.set!(unquote(module_to), :root, first_root)
+      Attributes.set!(unquote(module_to), :root, second_root)
+
+      first_refs = Attributes.get(unquote(module_from), :references)
+      second_refs = Attributes.get(unquote(module_to), :references)
+      Attributes.set(unquote(module_to), :references, Merge.merge(first_refs, second_refs))
     end
   end
 
