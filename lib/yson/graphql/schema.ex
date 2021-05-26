@@ -46,9 +46,11 @@ defmodule Yson.GraphQL.Schema do
   defmacro __before_compile__(_env) do
     module = __CALLER__.module
 
-    object = object(module)
-    kind = kind(module)
-    arguments = arguments(module)
+    request = Attributes.get!(module, :request)
+
+    object = request[:object]
+    kind = request[:kind]
+    arguments = Enum.into(request[:arguments], %{})
 
     body = Map.put(%{}, object, Yson.Schema.describe(module))
     resolvers = Map.put(%{}, object, Yson.Schema.resolvers(module))
@@ -125,7 +127,7 @@ defmodule Yson.GraphQL.Schema do
     body = fetch(body, @allowed_macros)
 
     quote do
-      Attributes.set(unquote(module),
+      Attributes.set!(unquote(module), :request,
         kind: unquote(kind),
         object: unquote(name),
         arguments: unquote(body)
@@ -134,8 +136,4 @@ defmodule Yson.GraphQL.Schema do
       Enum.into(unquote(body), %{})
     end
   end
-
-  defp kind(module), do: Attributes.get(module, :kind)
-  defp object(module), do: Attributes.get(module, :object)
-  defp arguments(module), do: module |> Attributes.get(:arguments) |> Enum.into(%{})
 end
