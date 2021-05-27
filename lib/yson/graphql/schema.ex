@@ -100,7 +100,7 @@ defmodule Yson.GraphQL.Schema do
   @doc """
   Defines a GraphQL query.
 
-  It specifies the query name and its arguments.
+  It specifies the query name and its arguments. It has to be defined exactly once, and it is mutually exclusive with `mutation/3`.
 
   ### Examples
       query :person do

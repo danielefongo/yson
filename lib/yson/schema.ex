@@ -91,7 +91,7 @@ defmodule Yson.Schema do
   @doc """
   Defines the root of the schema.
 
-  It contains the schema tree and must be defined.
+  It contains the schema tree and has to be defined exactly once.
   A root field could be a value, a map, an interface or a reference.
 
   ### Examples
