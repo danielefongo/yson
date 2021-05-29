@@ -46,7 +46,16 @@ defmodule Yson.Schema do
     quote do
       require Yson.Schema
       import Yson.Schema
+      @before_compile unquote(__MODULE__)
     end
+  end
+
+  defmacro __before_compile__(_env) do
+    module = __CALLER__.module
+
+    module
+    |> Attributes.get(:references)
+    |> validate_references(module)
   end
 
   @doc """
@@ -269,4 +278,22 @@ defmodule Yson.Schema do
 
   defp get_resolver(opts), do: Keyword.get(opts, :resolver, &identity/1)
   defp get_fields(body), do: fetch(body, @allowed_macros, @mapping)
+
+  defp validate_references(references, module, data \\ []) do
+    Macro.postwalk(references, fn node ->
+      case node do
+        {:reference, ref} ->
+          if Enum.member?(data, ref) do
+            raise "Found reference loop in #{inspect(data)}"
+          end
+
+          module
+          |> Attributes.get!(:references, ref)
+          |> validate_references(module, data ++ [ref])
+
+        _ ->
+          node
+      end
+    end)
+  end
 end
