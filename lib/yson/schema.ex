@@ -279,9 +279,7 @@ defmodule Yson.Schema do
     Macro.postwalk(references, fn node ->
       case node do
         {:reference, ref} ->
-          if Enum.member?(references_stack, ref) do
-            raise "Found circular dependency in #{inspect(references_stack)}"
-          end
+          check_circular_references(references_stack, ref)
 
           module
           |> get_ref(ref)
@@ -312,6 +310,12 @@ defmodule Yson.Schema do
 
     if conflicts != [] do
       raise "Found conflicts: #{inspect(conflicts)}."
+    end
+  end
+
+  defp check_circular_references(references_stack, reference) do
+    if Enum.member?(references_stack, reference) do
+      raise "Found circular dependency in #{inspect(references_stack)}"
     end
   end
 end
