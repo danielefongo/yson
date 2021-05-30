@@ -1,84 +1,81 @@
 defmodule Yson.Util.Attributes do
   @moduledoc false
+  @attributes_field :__attributes__
 
-  def set!(module, keywords) do
-    Enum.each(keywords, fn {key, value} -> set!(module, key, value) end)
-  end
+  def set!(module, key, value), do: set_on!(module, [key], value)
+  def set(module, key, value), do: set_on(module, [key], value)
 
-  def set(module, keywords) do
-    Enum.each(keywords, fn {key, value} -> set(module, key, value) end)
-  end
+  def set!(module, key, sub_key, value), do: set_on!(module, [key, sub_key], value)
+  def set(module, key, sub_key, value), do: set_on(module, [key, sub_key], value)
 
-  def set!(module, key, value) do
-    case get(module, key) do
-      nil -> set(module, key, value)
-      _ -> raise "#{key} already defined."
+  def get!(module, key), do: get_from!(module, [key])
+  def get(module, key), do: get_from(module, [key])
+
+  def get!(module, key, sub_key), do: get_from!(module, [key, sub_key])
+  def get(module, key, sub_key), do: get_from(module, [key, sub_key])
+
+  defp editable?(module), do: :elixir_module.mode(module) == :all
+
+  defp get_from!(module, where) do
+    case get_from(module, where) do
+      nil -> raise_err(where, "not found")
+      value -> value
     end
   end
 
-  def set(module, key, value) do
+  defp get_from(module, where) do
+    module
+    |> attributes()
+    |> get_in(filter(where))
+  end
+
+  defp set_on!(module, where, value) do
+    case get_from(module, where) do
+      nil -> set_on(module, where, value)
+      _ -> raise_err(where, "already defined")
+    end
+  end
+
+  defp set_on(module, where, value) do
     if not editable?(module) do
       raise "#{module} already compiled."
     end
 
-    Module.register_attribute(module, key, persist: true)
-    Module.put_attribute(module, key, value)
-
-    value
-  end
-
-  def set!(module, key, sub_key, value) do
-    case get(module, key, sub_key) do
-      nil -> set(module, key, sub_key, value)
-      _ -> raise "#{sub_key} already defined in #{key}."
-    end
-  end
-
-  def set(module, key, sub_key, value) do
-    if not editable?(module) do
-      raise "#{module} already compiled"
+    if is_nil(Module.get_attribute(module, @attributes_field)) do
+      Module.register_attribute(module, @attributes_field, persist: true)
     end
 
-    Module.register_attribute(module, key, persist: true)
-    data = Module.get_attribute(module, key, [])
-    data = Keyword.put(data, sub_key, value)
-    Module.put_attribute(module, key, data)
+    new_attributes =
+      module
+      |> attributes()
+      |> put_in(filter(where), value)
 
-    value
+    Module.put_attribute(module, @attributes_field, new_attributes)
   end
 
-  def get!(module, key) do
-    case get(module, key) do
-      nil -> raise "#{key} not found."
-      value -> value
-    end
-  end
-
-  def get(module, key) do
+  defp attributes(module) do
     if editable?(module) do
-      Module.get_attribute(module, key)
+      Module.get_attribute(module, @attributes_field, [])
     else
       :attributes
       |> module.__info__()
-      |> Keyword.get(key)
+      |> Keyword.get(@attributes_field, [])
     end
   end
 
-  def get!(module, key, sub_key) do
-    case get(module, key, sub_key) do
-      nil -> raise "#{sub_key} not found in #{key}."
-      value -> value
+  def filter(where), do: Enum.flat_map(where, fn key -> [&handle_empty/3, key] end)
+
+  def handle_empty(_, nil, next), do: next.([])
+  def handle_empty(_, data, next), do: next.(data)
+
+  defp raise_err(keys, message) do
+    path = keys |> Enum.drop(-1) |> Enum.join(" -> ")
+    key = List.last(keys)
+
+    if path != "" do
+      raise "#{key} #{message} in #{path}."
+    else
+      raise "#{key} #{message}."
     end
   end
-
-  def get(module, key, sub_key) do
-    module
-    |> get(key)
-    |> case do
-      nil -> nil
-      keywords -> Keyword.get(keywords, sub_key)
-    end
-  end
-
-  defp editable?(module), do: :elixir_module.mode(module) == :all
 end
