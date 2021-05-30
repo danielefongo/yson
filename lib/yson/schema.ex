@@ -32,7 +32,6 @@ defmodule Yson.Schema do
   """
 
   alias Yson.Util.Attributes
-  alias Yson.Util.Merge
   import Yson.Util.AST
   import Function, only: [identity: 1]
 
@@ -53,7 +52,7 @@ defmodule Yson.Schema do
     imported_references = Attributes.get(module, :imported_references)
     references = Attributes.get(module, :references)
 
-    Merge.merge(imported_references, references)
+    check_reference_conflicts(imported_references, references)
     squashed_refs = resolve_references(references, module)
 
     Attributes.set(module, :references, squashed_refs)
@@ -298,6 +297,21 @@ defmodule Yson.Schema do
     case Attributes.get(module, :imported_references, ref) do
       nil -> Attributes.get!(module, :references, ref)
       ref -> ref
+    end
+  end
+
+  defp check_reference_conflicts(_, nil), do: :ok
+  defp check_reference_conflicts(nil, _), do: :ok
+
+  defp check_reference_conflicts(references, other_references) do
+    references_keys = Keyword.keys(references)
+    other_references_keys = Keyword.keys(other_references)
+
+    conflicts =
+      Enum.filter(references_keys, fn key -> Enum.member?(other_references_keys, key) end)
+
+    if conflicts != [] do
+      raise "Found conflicts: #{inspect(conflicts)}."
     end
   end
 end
