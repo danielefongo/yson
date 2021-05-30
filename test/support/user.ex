@@ -1,19 +1,13 @@
-defmodule Support.PersonSchema do
+defmodule Support.User do
   @moduledoc false
   use Yson.Schema
   alias __MODULE__
 
-  map :user, resolver: &PersonSchema.user/1 do
-    interface :natural_person do
-      value(:first_name)
-      value(:last_name)
-    end
+  import_schema(Support.Person)
 
+  map :user, resolver: &User.user/1 do
+    reference(:natural_person)
     reference(:legal_person)
-  end
-
-  interface :legal_person do
-    value(:company_name)
   end
 
   def user(%{company_name: name}), do: %{full_name: name}

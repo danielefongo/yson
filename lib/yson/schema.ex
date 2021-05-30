@@ -7,13 +7,11 @@ defmodule Yson.Schema do
       defmodule Person do
         use Yson.Schema
 
-        root do
+        map :person do
           map :address do
             value(:street)
             value(:city)
           end
-
-          value(:name)
         end
       end
 
@@ -22,9 +20,8 @@ defmodule Yson.Schema do
       defmodule Person do
         use Yson.Schema
 
-        root do
+        map :person do
           reference(:address)
-          value(:name)
         end
 
         map :address do
@@ -53,32 +50,38 @@ defmodule Yson.Schema do
   defmacro __before_compile__(_env) do
     module = __CALLER__.module
 
-    module
-    |> Attributes.get(:references)
-    |> validate_references(module)
+    imported_references = Attributes.get(module, :imported_references)
+    references = Attributes.get(module, :references)
+
+    Merge.merge(imported_references, references)
+    squashed_refs = resolve_references(references, module)
+
+    Attributes.set(module, :references, squashed_refs)
   end
 
   @doc """
-  Imports schema types from another `Yson.Schema` module.
+  Imports schema main types from another `Yson.Schema` module.
 
   ### Examples
-      defmodule Base do
+      defmodule Address do
         use Yson.Schema
 
-        map :user do
-          value(:name)
+        map :address do
+          value(:city)
         end
       end
 
-      defmodule Extension do
+      defmodule Person do
         use Yson.Schema
 
-        import_schema(Base)
+        import_schema(Address)
 
-        root do
-          reference(:user)
+        map :person do
+          reference(:address)
         end
       end
+
+  Imported schema is not public. If a module imports `Person` schema and needs to refer :address explicitly, it will need to import `Address` too.
   """
   defmacro import_schema(module_from) do
     module_to = __CALLER__.module
@@ -86,21 +89,15 @@ defmodule Yson.Schema do
     quote do
       require unquote(module_from)
 
-      first_root = Attributes.get(unquote(module_from), :root)
-      second_root = Attributes.get(unquote(module_to), :root)
-      Attributes.set!(unquote(module_to), :root, first_root)
-      Attributes.set!(unquote(module_to), :root, second_root)
-
-      first_refs = Attributes.get(unquote(module_from), :references)
-      second_refs = Attributes.get(unquote(module_to), :references)
-      Attributes.set(unquote(module_to), :references, Merge.merge(first_refs, second_refs))
+      imported_references = Attributes.get(unquote(module_from), :references)
+      Attributes.set(unquote(module_to), :imported_references, imported_references)
     end
   end
 
   @doc """
   Defines the root of the schema.
 
-  It contains the schema tree and has to be defined exactly once.
+  It contains the schema tree.
   A root field could be a value, a map, an interface or a reference.
 
   ### Examples
@@ -132,7 +129,7 @@ defmodule Yson.Schema do
   The referenced map/interface should be defined outside the `root/2` macro scope.
 
   ### Example
-      root do
+      map :any do
         reference(:referenced)
       end
 
@@ -233,7 +230,7 @@ defmodule Yson.Schema do
 
   defp describe({:reference, ref}, map, module) do
     module
-    |> Attributes.get!(:references, ref)
+    |> get_ref(ref)
     |> describe(%{}, module)
     |> Map.merge(map)
   end
@@ -271,7 +268,7 @@ defmodule Yson.Schema do
 
   defp resolver({:reference, ref}, map, module) do
     module
-    |> Attributes.get!(:references, ref)
+    |> get_ref(ref)
     |> resolver(%{}, module)
     |> Map.merge(map)
   end
@@ -279,21 +276,28 @@ defmodule Yson.Schema do
   defp get_resolver(opts), do: Keyword.get(opts, :resolver, &identity/1)
   defp get_fields(body), do: fetch(body, @allowed_macros, @mapping)
 
-  defp validate_references(references, module, data \\ []) do
+  defp resolve_references(references, module, references_stack \\ []) do
     Macro.postwalk(references, fn node ->
       case node do
         {:reference, ref} ->
-          if Enum.member?(data, ref) do
-            raise "Found reference loop in #{inspect(data)}"
+          if Enum.member?(references_stack, ref) do
+            raise "Found circular dependency in #{inspect(references_stack)}"
           end
 
           module
-          |> Attributes.get!(:references, ref)
-          |> validate_references(module, data ++ [ref])
+          |> get_ref(ref)
+          |> resolve_references(module, references_stack ++ [ref])
 
         _ ->
           node
       end
     end)
+  end
+
+  defp get_ref(module, ref) do
+    case Attributes.get(module, :imported_references, ref) do
+      nil -> Attributes.get!(module, :references, ref)
+      ref -> ref
+    end
   end
 end

@@ -1,8 +1,8 @@
-defmodule Support.PersonClient do
+defmodule Support.Client do
   @moduledoc false
   use Yson.GraphQL.Schema
 
-  import_schema(Support.PersonSchema)
+  import_schema(Support.User)
 
   query :sample do
     arg :user do

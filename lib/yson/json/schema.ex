@@ -18,6 +18,8 @@ defmodule Yson.Json.Schema do
         end
       end
 
+  Root must be defined once using `Yson.Schema.root/2` macro.
+
   After the definition, a Json Schema exposes two methods:
   - `describe/0`, to build the object description.
   - `resolvers/0`, to build the object resolvers tree. It can be used with `Yson.Parser.parse/3` to parse json response.

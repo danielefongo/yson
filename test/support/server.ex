@@ -1,4 +1,4 @@
-defmodule Support.PersonServer do
+defmodule Support.Server do
   @moduledoc false
 
   use Absinthe.Schema

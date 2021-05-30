@@ -3,6 +3,7 @@ defmodule Yson.SchemaTest do
   import Yson.Schema
   import Function, only: [identity: 1]
   import Support.Macro
+  alias Yson.Util.Attributes
 
   describe "import schema" do
     test "references" do
@@ -25,30 +26,35 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert describe(ReferencesExtended) == %{bar: nil, foo: %{one: nil}}
+      assert [foo: _] = Attributes.get(ReferencesExtended, :imported_references)
     end
 
-    test "root" do
+    test "don't propagate references" do
       defmodule RootBase do
         use Yson.Schema
 
         map :foo do
           value(:one)
         end
+      end
 
-        root do
-          reference(:foo)
-          value(:bar)
+      defmodule RootIntermediate do
+        use Yson.Schema
+
+        import_schema(RootBase)
+
+        map :bar do
+          value(:one)
         end
       end
 
       defmodule RootExtended do
         use Yson.Schema
 
-        import_schema(RootBase)
+        import_schema(RootIntermediate)
       end
 
-      assert describe(RootExtended) == %{bar: nil, foo: %{one: nil}}
+      assert [bar: _] = Attributes.get(RootExtended, :imported_references)
     end
   end
 

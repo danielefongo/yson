@@ -22,6 +22,8 @@ defmodule Yson.GraphQL.Schema do
         end
       end
 
+  Root must be defined once using `Yson.Schema.root/2` macro.
+
   After the definition, a GraphQL Schema exposes two methods:
   - `describe/0`, to build the object description. It can be used with `Yson.GraphQL.Builder.build/2` to create a GraphQL request.
   - `resolvers/0`, to build the object resolvers tree. It can be used with `Yson.Parser.parse/3` to parse a GraphQL response.
