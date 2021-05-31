@@ -32,6 +32,7 @@ defmodule Yson.Schema do
   """
 
   alias Yson.Util.Attributes
+  alias Yson.Util.Merge
   import Yson.Util.AST
   import Function, only: [identity: 1]
 
@@ -89,7 +90,13 @@ defmodule Yson.Schema do
       require unquote(module_from)
 
       imported_references = Attributes.get(unquote(module_from), :references)
-      Attributes.set(unquote(module_to), :imported_references, imported_references)
+      already_imported_references = Attributes.get(unquote(module_to), :imported_references)
+
+      Attributes.set(
+        unquote(module_to),
+        :imported_references,
+        Merge.merge(already_imported_references, imported_references)
+      )
     end
   end
 
