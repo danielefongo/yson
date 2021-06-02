@@ -5,7 +5,7 @@ defmodule Yson.GraphQL.ApiTest do
   alias Support.{Client, Server}
 
   api_test "ask and parse using Yson schema" do
-    expected_result = %{sample: %{email: "a@b.c", user: %{full_name: "legal name"}}}
+    expected_result = %{user: %{email: "a@b.c", person: %{full_name: "legal name"}}}
     variables = %{email: "a@b.c"}
 
     mock :post, "/graphql" do
