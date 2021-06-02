@@ -2,7 +2,8 @@
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/danielefongo/yson/ci)
 ![Coveralls](https://img.shields.io/coveralls/github/danielefongo/yson)
-![GitHub](https://img.shields.io/github/license/danielefongo/yson)
+[![Hex pm](http://img.shields.io/hexpm/v/yson.svg?style=flat)](https://hex.pm/packages/yson)
+![Hex.pm](https://img.shields.io/hexpm/l/yson)
 
 Run json/graphql requests and parse responses in an easy way.
 
@@ -13,7 +14,7 @@ The package can be installed by adding `yson` to your list of dependencies in `m
 ```elixir
 def deps do
   [
-    {:yson, git: "https://github.com/danielefongo/yson.git"}
+    {:yson, "~> 0.1.0"}
   ]
 end
 ```

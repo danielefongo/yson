@@ -7,11 +7,13 @@ defmodule Yson.Builder.MixProject do
   def project do
     [
       app: :yson,
-      version: "0.1.0",
+      description: "Run json/graphql requests and parse responses in an easy way",
+      source_url: @github,
+      version: @version,
       elixir: "~> 1.10",
+      start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       aliases: aliases(),
-      start_permanent: Mix.env() == :prod,
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
@@ -19,6 +21,10 @@ defmodule Yson.Builder.MixProject do
         "coveralls.detail": :test,
         "coveralls.post": :test,
         "coveralls.html": :test
+      ],
+      package: [
+        links: %{"GitHub" => @github},
+        licenses: ["GPL-3.0-or-later"]
       ],
       docs: [
         main: "readme",
