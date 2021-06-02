@@ -3,7 +3,6 @@ defmodule Yson.SchemaTest do
   import Yson.Schema
   import Function, only: [identity: 1]
   import Support.Macro
-  alias Yson.Util.Attributes
 
   describe "import schema" do
     test "references" do
@@ -26,7 +25,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert [foo: _] = Attributes.get(ReferencesExtended, :imported_references)
+      assert [foo: _] = Attributes.get(ReferencesExtended, [:imported_references])
     end
 
     test "don't propagate references" do
@@ -54,7 +53,7 @@ defmodule Yson.SchemaTest do
         import_schema(RootIntermediate)
       end
 
-      assert [bar: _] = Attributes.get(RootExtended, :imported_references)
+      assert [bar: _] = Attributes.get(RootExtended, [:imported_references])
     end
   end
 
