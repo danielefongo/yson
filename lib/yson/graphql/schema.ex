@@ -3,7 +3,7 @@ defmodule Yson.GraphQL.Schema do
   Defines a Yson GraphQL Schema.
 
   It is an extension of `Yson.Schema` that represents a GraphQL request and response object.
-  The request is built using `query/3` or `mutation/3` while the response and its parsing by the `Yson.Schema.root/2` tree.
+  The request is built using `query/3` or `mutation/3` while the response and its parsing are defined by the `Yson.Schema.root/2` tree.
 
       defmodule Person do
         use Yson.GraphQL.Schema
@@ -102,7 +102,8 @@ defmodule Yson.GraphQL.Schema do
   @doc """
   Defines a GraphQL query.
 
-  It specifies the query name and its arguments. It has to be defined exactly once, and it is mutually exclusive with `mutation/3`.
+  It specifies the query name and its arguments.
+  It has to be defined exactly once, and it is mutually exclusive with `mutation/3`.
 
   ### Examples
       query :person do

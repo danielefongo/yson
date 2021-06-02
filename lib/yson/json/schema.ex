@@ -3,7 +3,7 @@ defmodule Yson.Json.Schema do
   Defines a Yson Json Schema.
 
   It is an extension of `Yson.Schema` that represents a Json response object.
-  The request is built using `query/3` or `mutation/3` while the response and its parsing by the `Yson.Schema.root/2` tree.
+  The parsing of the JSON is defined by the `Yson.Schema.root/2` tree.
 
       defmodule Person do
         use Yson.Yson.Schema

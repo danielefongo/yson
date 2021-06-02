@@ -2,18 +2,19 @@ defmodule Yson.GraphQL.Api do
   @moduledoc """
   Defines the GraphQL Api.
 
-  It offers a minimal http client that hides complexity of `Yson.GraphQL.Builder` and `Yson.Parser` usage.
+  It also provides a function to run requests to the api and parse the obtained response,
+  hiding the complexity of `Yson.GraphQL.Builder` and `Yson.Parser` usage
 
       iex> variables = %{var1: "value"}
-      iex> headers = [] #optional
-      iex> options = [] #optional
+      iex> headers = [] # optional
+      iex> options = [] # optional
       iex> Api.run(Schema, variables, "https://mysite.com/graphql", headers, options)
   """
   alias Yson.GraphQL.Builder
   alias Yson.Parser
 
   @doc """
-  Executes the GraphQL request and returns a parsed response or an error.
+  Executes the GraphQL request and returns the parsed response or an error.
 
   ### Example
       run(ASchema, %{var1: "value"})

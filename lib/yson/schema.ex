@@ -1,6 +1,6 @@
 defmodule Yson.Schema do
   @moduledoc """
-  Defines a Yson Schema that can be included other schemas.
+  Defines a Yson Schema that can be included in other schemas.
 
   It is the base of high level schemas like `Yson.GraphQL.Schema` and `Yson.Json.Schema`, and contains useful macros to build up Schema description and resolvers tree.
 
@@ -15,7 +15,7 @@ defmodule Yson.Schema do
         end
       end
 
-  Deep nesting is allowed but it always possible to move a block outside and reference it with `reference/1`. The previous example could be changed as follows:
+  Deep nesting is allowed but it is always possible to move a block outside and reference it with `reference/1`. The previous example could be changed as follows:
 
       defmodule Person do
         use Yson.Schema
@@ -104,7 +104,7 @@ defmodule Yson.Schema do
   Defines the root of the schema.
 
   It contains the schema tree.
-  A root field could be a value, a map, an interface or a reference.
+  A root field can be a value, a map, an interface or a reference.
 
   ### Examples
       root do
