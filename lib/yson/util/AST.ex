@@ -5,7 +5,6 @@ defmodule Yson.Util.AST do
     body
     |> ast_to_list()
     |> validate(markers)
-    |> find_valid_macros(markers)
     |> transform(rename_mapping)
   end
 
@@ -15,8 +14,6 @@ defmodule Yson.Util.AST do
       content -> [content]
     end
   end
-
-  defp find_valid_macros(list, allowed), do: Enum.filter(list, &validate_single(&1, allowed))
 
   defp validate(list, allowed) do
     if not Enum.all?(list, &validate_single(&1, allowed)) do

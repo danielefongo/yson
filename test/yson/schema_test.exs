@@ -4,6 +4,36 @@ defmodule Yson.SchemaTest do
   import Function, only: [identity: 1]
   import Support.Macro
 
+  describe "circular references" do
+    test "raise error on self reference" do
+      assert_raise RuntimeError, fn ->
+        defmodule CircularReferenceSelf do
+          use Yson.Schema
+
+          map :foo do
+            reference(:foo)
+          end
+        end
+      end
+    end
+
+    test "raise error on cross reference" do
+      assert_raise RuntimeError, fn ->
+        defmodule CircularReferenceCross do
+          use Yson.Schema
+
+          map :foo do
+            reference(:bar)
+          end
+
+          map :bar do
+            reference(:foo)
+          end
+        end
+      end
+    end
+  end
+
   describe "import schema" do
     test "references" do
       defmodule ReferencesBase do
@@ -28,8 +58,8 @@ defmodule Yson.SchemaTest do
       assert [foo: _] = Attributes.get(ReferencesExtended, [:imported_references])
     end
 
-    test "don't propagate references" do
-      defmodule RootBase do
+    test "description" do
+      defmodule ReferencesDescriptionBase do
         use Yson.Schema
 
         map :foo do
@@ -37,23 +67,67 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      defmodule RootIntermediate do
+      defmodule ReferencesDescriptionExtended do
         use Yson.Schema
 
-        import_schema(RootBase)
+        import_schema(ReferencesDescriptionBase)
+
+        root do
+          reference(:foo)
+        end
+      end
+
+      assert describe(ReferencesDescriptionExtended) == %{foo: %{one: nil}}
+    end
+
+    test "don't propagate references" do
+      defmodule PropagateBase do
+        use Yson.Schema
+
+        map :foo do
+          value(:one)
+        end
+      end
+
+      defmodule PropagateIntermediate do
+        use Yson.Schema
+
+        import_schema(PropagateBase)
 
         map :bar do
           value(:one)
         end
       end
 
-      defmodule RootExtended do
+      defmodule PropagateExtended do
         use Yson.Schema
 
-        import_schema(RootIntermediate)
+        import_schema(PropagateIntermediate)
       end
 
-      assert [bar: _] = Attributes.get(RootExtended, [:imported_references])
+      assert [bar: _] = Attributes.get(PropagateExtended, [:imported_references])
+    end
+
+    test "raise on conflicts" do
+      assert_raise RuntimeError, fn ->
+        defmodule RaiseBase do
+          use Yson.Schema
+
+          map :foo do
+            value(:one)
+          end
+        end
+
+        defmodule RaiseExtended do
+          use Yson.Schema
+
+          import_schema(RaiseBase)
+
+          map :foo do
+            value(:one)
+          end
+        end
+      end
     end
   end
 
@@ -88,6 +162,19 @@ defmodule Yson.SchemaTest do
       {_, resolvers} = resolvers(InterfaceResolvers)
 
       assert resolvers == %{one: &identity/1, two: &identity/1}
+    end
+
+    test "references" do
+      defmodule InterfaceReferences do
+        use Yson.Schema
+
+        interface :foo do
+          value(:one)
+          value(:two)
+        end
+      end
+
+      assert [foo: _] = Attributes.get(InterfaceReferences, [:references])
     end
   end
 
@@ -177,6 +264,19 @@ defmodule Yson.SchemaTest do
       {_, resolvers} = resolvers(MapCustomResolvers)
 
       assert resolvers == %{foo: {&echo_resolver/1, %{one: &identity/1, two: &identity/1}}}
+    end
+
+    test "references" do
+      defmodule MapReferences do
+        use Yson.Schema
+
+        map :foo do
+          value(:one)
+          value(:two)
+        end
+      end
+
+      assert [foo: _] = Attributes.get(MapReferences, [:references])
     end
   end
 

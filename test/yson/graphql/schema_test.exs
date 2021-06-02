@@ -2,7 +2,7 @@ defmodule Yson.GraphQL.SchemaTest do
   use ExUnit.Case
   import Function, only: [identity: 1]
 
-  defmodule Sample do
+  defmodule SampleQuery do
     use Yson.GraphQL.Schema
 
     query :sample do
@@ -20,17 +20,57 @@ defmodule Yson.GraphQL.SchemaTest do
     end
   end
 
-  test "generate description" do
-    description = Sample.describe()
+  defmodule SampleMutation do
+    use Yson.GraphQL.Schema
 
-    assert description.object == :sample
+    mutation :sample do
+      arg(:data, :string)
 
-    assert description.body == %{sample: %{age: nil, email: nil}}
+      arg :user do
+        arg(:email, :string)
+        arg(:age, :integer)
+      end
+    end
 
-    assert description.arguments == %{data: :string, user: %{email: :string, age: :integer}}
+    root do
+      value(:email)
+      value(:age)
+    end
   end
 
-  test "generate resolvers" do
-    assert Sample.resolvers() == %{sample: {&identity/1, %{age: &identity/1, email: &identity/1}}}
+  describe "query" do
+    test "generate description" do
+      description = SampleQuery.describe()
+
+      assert description.object == :sample
+
+      assert description.body == %{sample: %{age: nil, email: nil}}
+
+      assert description.arguments == %{data: :string, user: %{email: :string, age: :integer}}
+    end
+
+    test "generate resolvers" do
+      assert SampleQuery.resolvers() == %{
+               sample: {&identity/1, %{age: &identity/1, email: &identity/1}}
+             }
+    end
+  end
+
+  describe "mutation" do
+    test "generate description" do
+      description = SampleMutation.describe()
+
+      assert description.object == :sample
+
+      assert description.body == %{sample: %{age: nil, email: nil}}
+
+      assert description.arguments == %{data: :string, user: %{email: :string, age: :integer}}
+    end
+
+    test "generate resolvers" do
+      assert SampleMutation.resolvers() == %{
+               sample: {&identity/1, %{age: &identity/1, email: &identity/1}}
+             }
+    end
   end
 end
