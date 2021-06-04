@@ -30,7 +30,6 @@ defmodule Yson.GraphQL.Schema do
   """
 
   import Yson.Util.AST
-  alias Yson.Util.Attributes
 
   @allowed_macros [:arg]
 
@@ -48,7 +47,7 @@ defmodule Yson.GraphQL.Schema do
   defmacro __before_compile__(_env) do
     module = __CALLER__.module
 
-    request = Attributes.get!(module, :request)
+    request = Attributes.get!(module, [:request])
 
     object = request[:object]
     kind = request[:kind]
@@ -130,7 +129,7 @@ defmodule Yson.GraphQL.Schema do
     body = fetch(body, @allowed_macros)
 
     quote do
-      Attributes.set!(unquote(module), :request,
+      Attributes.set!(unquote(module), [:request],
         kind: unquote(kind),
         object: unquote(name),
         arguments: unquote(body)

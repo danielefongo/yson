@@ -31,7 +31,6 @@ defmodule Yson.Schema do
       end
   """
 
-  alias Yson.Util.Attributes
   alias Yson.Util.Merge
   import Yson.Util.AST
   import Function, only: [identity: 1]
@@ -50,13 +49,13 @@ defmodule Yson.Schema do
   defmacro __before_compile__(_env) do
     module = __CALLER__.module
 
-    imported_references = Attributes.get(module, :imported_references)
-    references = Attributes.get(module, :references)
+    imported_references = Attributes.get(module, [:imported_references])
+    references = Attributes.get(module, [:references])
 
     check_reference_conflicts(imported_references, references)
     squashed_refs = resolve_references(references, module)
 
-    Attributes.set(module, :references, squashed_refs)
+    Attributes.set(module, [:references], squashed_refs)
   end
 
   @doc """
@@ -89,12 +88,12 @@ defmodule Yson.Schema do
     quote do
       require unquote(module_from)
 
-      imported_references = Attributes.get(unquote(module_from), :references)
-      already_imported_references = Attributes.get(unquote(module_to), :imported_references)
+      imported_references = Attributes.get(unquote(module_from), [:references])
+      already_imported_references = Attributes.get(unquote(module_to), [:imported_references])
 
       Attributes.set(
         unquote(module_to),
-        :imported_references,
+        [:imported_references],
         Merge.merge(already_imported_references, imported_references)
       )
     end
@@ -125,7 +124,7 @@ defmodule Yson.Schema do
     resolver = get_resolver(opts)
 
     quote do
-      Attributes.set!(unquote(module), :root, [unquote(resolver), unquote(fields)])
+      Attributes.set!(unquote(module), [:root], [unquote(resolver), unquote(fields)])
     end
   end
 
@@ -183,7 +182,7 @@ defmodule Yson.Schema do
 
     quote do
       node = {:interface, [unquote(name), unquote(fields)]}
-      Attributes.set!(unquote(module), :references, unquote(name), node)
+      Attributes.set!(unquote(module), [:references, unquote(name)], node)
     end
   end
 
@@ -219,7 +218,7 @@ defmodule Yson.Schema do
 
     quote do
       node = {:map, [unquote(name), unquote(resolver), unquote(fields)]}
-      Attributes.set!(unquote(module), :references, unquote(name), node)
+      Attributes.set!(unquote(module), [:references, unquote(name)], node)
     end
   end
 
@@ -233,14 +232,14 @@ defmodule Yson.Schema do
 
   @doc false
   def describe(module) do
-    [_, description] = Attributes.get!(module, :root)
+    [_, description] = Attributes.get!(module, [:root])
 
     Enum.reduce(description, %{}, fn data, m -> describe(data, m, module) end)
   end
 
   @doc false
   def resolvers(module) do
-    [resolver, description] = Attributes.get!(module, :root)
+    [resolver, description] = Attributes.get!(module, [:root])
 
     resolvers = Enum.reduce(description, %{}, fn data, m -> resolver(data, m, module) end)
 
@@ -323,8 +322,8 @@ defmodule Yson.Schema do
   defp get_ref(module, [ref, _]), do: get_ref(module, ref)
 
   defp get_ref(module, ref) do
-    case Attributes.get(module, :imported_references, ref) do
-      nil -> Attributes.get!(module, :references, ref)
+    case Attributes.get(module, [:imported_references, ref]) do
+      nil -> Attributes.get!(module, [:references, ref])
       ref -> ref
     end
   end
