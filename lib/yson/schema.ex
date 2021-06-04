@@ -56,6 +56,9 @@ defmodule Yson.Schema do
     squashed_refs = resolve_references(references, module)
 
     Attributes.set(module, [:references], squashed_refs)
+
+    root = Attributes.get(module, [:root], [])
+    Attributes.set(module, [:root], resolve_references(root, module))
   end
 
   @doc """
@@ -246,16 +249,6 @@ defmodule Yson.Schema do
     {resolver, resolvers}
   end
 
-  defp describe({:reference, [ref, as]}, map, module) do
-    reference_map =
-      module
-      |> get_ref(ref)
-      |> describe(%{}, module)
-      |> Map.get(ref)
-
-    Map.put(map, as, reference_map)
-  end
-
   defp describe({:interface, [name, list]}, map, module) do
     inner_keywords =
       list
@@ -287,16 +280,6 @@ defmodule Yson.Schema do
     Map.put(map, name, {resolver, inner_resolvers})
   end
 
-  defp resolver({:reference, [ref, as]}, map, module) do
-    reference_map =
-      module
-      |> get_ref(ref)
-      |> resolver(%{}, module)
-      |> Map.get(ref)
-
-    Map.put(map, as, reference_map)
-  end
-
   defp get_resolver(opts), do: Keyword.get(opts, :resolver, &identity/1)
   defp get_fields(body), do: fetch(body, @allowed_macros, @mapping)
 
@@ -318,8 +301,6 @@ defmodule Yson.Schema do
       end
     end)
   end
-
-  defp get_ref(module, [ref, _]), do: get_ref(module, ref)
 
   defp get_ref(module, ref) do
     case Attributes.get(module, [:imported_references, ref]) do
