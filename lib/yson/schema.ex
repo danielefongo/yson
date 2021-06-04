@@ -53,12 +53,11 @@ defmodule Yson.Schema do
     references = Attributes.get(module, [:references])
 
     check_reference_conflicts(imported_references, references)
-    squashed_refs = resolve_references(references, module)
+    squashed_refs = resolve_references(references, module, [])
 
     Attributes.set(module, [:references], squashed_refs)
 
-    root = Attributes.get(module, [:root], [])
-    Attributes.set(module, [:root], resolve_references(root, module))
+    Attributes.update(module, [:root], &resolve_references(&1, module, []))
   end
 
   @doc """
@@ -92,12 +91,11 @@ defmodule Yson.Schema do
       require unquote(module_from)
 
       imported_references = Attributes.get(unquote(module_from), [:references])
-      already_imported_references = Attributes.get(unquote(module_to), [:imported_references])
 
-      Attributes.set(
+      Attributes.update(
         unquote(module_to),
         [:imported_references],
-        Merge.merge(already_imported_references, imported_references)
+        &Merge.merge(&1, imported_references)
       )
     end
   end
@@ -283,7 +281,10 @@ defmodule Yson.Schema do
   defp get_resolver(opts), do: Keyword.get(opts, :resolver, &identity/1)
   defp get_fields(body), do: fetch(body, @allowed_macros, @mapping)
 
-  defp resolve_references(references, module, references_stack \\ []) do
+  defp resolve_references(nil, module, references_stack),
+    do: resolve_references([], module, references_stack)
+
+  defp resolve_references(references, module, references_stack) do
     Macro.postwalk(references, fn node ->
       case node do
         {:reference, [ref, as]} ->

@@ -49,7 +49,7 @@ defmodule Yson.Builder.MixProject do
       {:jason, "~> 1.2.2"},
       {:recase, "~> 0.5"},
       {:ex_doc, "~> 0.24.2"},
-      {:attributes, "~> 0.2.0"},
+      {:attributes, "~> 0.3.0"},
       {:absinthe, "~> 1.6", only: :test},
       {:bypass, "~> 2.1.0-rc.0", only: :test},
       {:credo, "~> 1.4.1", only: [:dev, :test]},
