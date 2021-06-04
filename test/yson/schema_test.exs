@@ -48,14 +48,36 @@ defmodule Yson.SchemaTest do
         use Yson.Schema
 
         import_schema(ReferencesBase)
-
-        root do
-          reference(:foo)
-          value(:bar)
-        end
       end
 
       assert [foo: _] = Attributes.get(ReferencesExtended, [:imported_references])
+    end
+
+    test "multiple references" do
+      defmodule MultipleReferencesBase1 do
+        use Yson.Schema
+
+        map :foo do
+          value(:one)
+        end
+      end
+
+      defmodule MultipleReferencesBase2 do
+        use Yson.Schema
+
+        map :bar do
+          value(:one)
+        end
+      end
+
+      defmodule MultipleReferencesExtended do
+        use Yson.Schema
+
+        import_schema(MultipleReferencesBase1)
+        import_schema(MultipleReferencesBase2)
+      end
+
+      assert [foo: _, bar: _] = Attributes.get(MultipleReferencesExtended, [:imported_references])
     end
 
     test "description" do
