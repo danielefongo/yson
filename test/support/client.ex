@@ -12,6 +12,6 @@ defmodule Support.Client do
 
   root do
     value(:email)
-    reference(:person)
+    reference(:my_person, as: :person)
   end
 end

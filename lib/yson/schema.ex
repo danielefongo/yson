@@ -15,7 +15,7 @@ defmodule Yson.Schema do
         end
       end
 
-  Deep nesting is allowed but it is always possible to move a block outside and reference it with `reference/1`. The previous example could be changed as follows:
+  Deep nesting is allowed but it is always possible to move a block outside and reference it with `reference/2`. The previous example could be changed as follows:
 
       defmodule Person do
         use Yson.Schema
@@ -142,8 +142,21 @@ defmodule Yson.Schema do
       map :referenced do
         value(:name)
       end
+
+  It is also possible to rename the referenced field:
+
+  ### Example
+      map :any do
+        reference(:referenced, as: :my_field)
+      end
+
+      map :referenced do
+        value(:name)
+      end
   """
-  defmacro reference(reference), do: {:reference, reference}
+  defmacro reference(reference, opts \\ []) when is_list(opts) do
+    {:reference, [reference, Keyword.get(opts, :as, reference)]}
+  end
 
   @doc """
   Defines a simple field.
@@ -234,11 +247,14 @@ defmodule Yson.Schema do
     {resolver, resolvers}
   end
 
-  defp describe({:reference, ref}, map, module) do
-    module
-    |> get_ref(ref)
-    |> describe(%{}, module)
-    |> Map.merge(map)
+  defp describe({:reference, [ref, as]}, map, module) do
+    reference_map =
+      module
+      |> get_ref(ref)
+      |> describe(%{}, module)
+      |> Map.get(ref)
+
+    Map.put(map, as, reference_map)
   end
 
   defp describe({:interface, [name, list]}, map, module) do
@@ -272,11 +288,14 @@ defmodule Yson.Schema do
     Map.put(map, name, {resolver, inner_resolvers})
   end
 
-  defp resolver({:reference, ref}, map, module) do
-    module
-    |> get_ref(ref)
-    |> resolver(%{}, module)
-    |> Map.merge(map)
+  defp resolver({:reference, [ref, as]}, map, module) do
+    reference_map =
+      module
+      |> get_ref(ref)
+      |> resolver(%{}, module)
+      |> Map.get(ref)
+
+    Map.put(map, as, reference_map)
   end
 
   defp get_resolver(opts), do: Keyword.get(opts, :resolver, &identity/1)
@@ -285,18 +304,23 @@ defmodule Yson.Schema do
   defp resolve_references(references, module, references_stack \\ []) do
     Macro.postwalk(references, fn node ->
       case node do
-        {:reference, ref} ->
+        {:reference, [ref, as]} ->
           check_circular_references(references_stack, ref)
 
-          module
-          |> get_ref(ref)
-          |> resolve_references(module, references_stack ++ [ref])
+          {type, [_ | data]} =
+            module
+            |> get_ref(ref)
+            |> resolve_references(module, references_stack ++ [ref])
+
+          {type, [as] ++ data}
 
         _ ->
           node
       end
     end)
   end
+
+  defp get_ref(module, [ref, _]), do: get_ref(module, ref)
 
   defp get_ref(module, ref) do
     case Attributes.get(module, :imported_references, ref) do

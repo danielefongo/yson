@@ -338,6 +338,22 @@ defmodule Yson.SchemaTest do
       assert describe(ReferenceDescription) == %{foo: %{one: nil, two: nil}}
     end
 
+    test "description when aliased" do
+      defmodule ReferenceAliasDescription do
+        use Yson.Schema
+
+        root do
+          reference(:foo, as: :bar)
+        end
+
+        map :foo do
+          value(:one)
+        end
+      end
+
+      assert describe(ReferenceAliasDescription) == %{bar: %{one: nil}}
+    end
+
     test "resolvers" do
       defmodule ReferenceResolvers do
         use Yson.Schema
@@ -354,6 +370,24 @@ defmodule Yson.SchemaTest do
 
       assert resolvers(ReferenceResolvers) ==
                {&identity/1, %{foo: {&identity/1, %{one: &identity/1, two: &identity/1}}}}
+    end
+
+    test "resolvers when aliased" do
+      defmodule ReferenceAliasResolvers do
+        use Yson.Schema
+
+        root do
+          reference(:foo, as: :bar)
+        end
+
+        map :foo do
+          value(:one)
+          value(:two)
+        end
+      end
+
+      assert resolvers(ReferenceAliasResolvers) ==
+               {&identity/1, %{bar: {&identity/1, %{one: &identity/1, two: &identity/1}}}}
     end
   end
 

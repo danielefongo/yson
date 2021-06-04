@@ -5,7 +5,7 @@ defmodule Support.Person do
 
   import_schema(Support.Address)
 
-  map :person, resolver: &Person.person/1 do
+  map :my_person, resolver: &Person.person/1 do
     reference(:natural_person)
     reference(:legal_person)
   end
