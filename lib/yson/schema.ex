@@ -125,7 +125,7 @@ defmodule Yson.Schema do
     resolver = get_resolver(opts)
 
     quote do
-      Attributes.set!(unquote(module), [:root], [unquote(resolver), unquote(fields)])
+      Attributes.set!(unquote(module), [:root], {:root, [unquote(resolver), unquote(fields)]})
     end
   end
 
@@ -232,51 +232,24 @@ defmodule Yson.Schema do
   end
 
   @doc false
-  def describe(module) do
-    [_, description] = Attributes.get!(module, [:root])
+  def describe(module),
+    do: module |> Attributes.get!([:root]) |> Macro.postwalk(&inner_describe/1)
 
-    Enum.reduce(description, %{}, fn data, m -> describe(data, m, module) end)
-  end
+  defp inner_describe({:root, [_res, fields]}), do: Enum.into(fields, %{})
+  defp inner_describe({:map, [name, _res, fields]}), do: {name, Enum.into(fields, %{})}
+  defp inner_describe({:interface, [name, fields]}), do: {name, fields}
+  defp inner_describe({:value, [name, _res]}), do: {name, nil}
+  defp inner_describe(node), do: node
 
   @doc false
-  def resolvers(module) do
-    [resolver, description] = Attributes.get!(module, [:root])
+  def resolvers(module),
+    do: module |> Attributes.get!([:root]) |> Macro.postwalk(&inner_resolver/1)
 
-    resolvers = Enum.reduce(description, %{}, fn data, m -> resolver(data, m, module) end)
-
-    {resolver, resolvers}
-  end
-
-  defp describe({:interface, [name, list]}, map, module) do
-    inner_keywords =
-      list
-      |> Enum.reduce(%{}, fn data, m -> describe(data, m, module) end)
-      |> Enum.to_list()
-
-    Map.put(map, name, inner_keywords)
-  end
-
-  defp describe({:map, [name, _resolver, list]}, map, module) do
-    inner_map = Enum.reduce(list, %{}, fn data, m -> describe(data, m, module) end)
-
-    Map.put(map, name, inner_map)
-  end
-
-  defp describe({:value, [name, _resolver]}, map, _module), do: Map.put(map, name, nil)
-
-  defp resolver({:interface, [_name, list]}, map, module) do
-    list
-    |> Enum.reduce(%{}, fn data, m -> resolver(data, m, module) end)
-    |> Map.merge(map)
-  end
-
-  defp resolver({:value, [name, resolver]}, map, _module), do: Map.put(map, name, resolver)
-
-  defp resolver({:map, [name, resolver, list]}, map, module) do
-    inner_resolvers = Enum.reduce(list, %{}, fn data, m -> resolver(data, m, module) end)
-
-    Map.put(map, name, {resolver, inner_resolvers})
-  end
+  defp inner_resolver({:root, [res, fields]}), do: {res, list_to_flat_map(fields)}
+  defp inner_resolver({:map, [name, res, fields]}), do: {name, {res, list_to_flat_map(fields)}}
+  defp inner_resolver({:interface, [_name, fields]}), do: fields
+  defp inner_resolver({:value, [name, res]}), do: {name, res}
+  defp inner_resolver(node), do: node
 
   defp get_resolver(opts), do: Keyword.get(opts, :resolver, &identity/1)
   defp get_fields(body), do: fetch(body, @allowed_macros, @mapping)
@@ -330,4 +303,6 @@ defmodule Yson.Schema do
       raise "Found circular dependency in #{inspect(references_stack)}"
     end
   end
+
+  defp list_to_flat_map(list), do: list |> List.flatten() |> Enum.into(%{})
 end
