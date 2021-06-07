@@ -7,9 +7,9 @@ defmodule Yson.ParserTest do
   def collapse_name(%{name: name, surname: surname}), do: %{full_name: "#{name} #{surname}"}
 
   test "parse shallow" do
-    resolvers = %{
-      sample: {&identity/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
-    }
+    resolvers = [
+      sample: {&identity/1, [name: &reverse_text/1, surname: &reverse_text/1]}
+    ]
 
     data = %{
       sample: %{
@@ -29,13 +29,13 @@ defmodule Yson.ParserTest do
   end
 
   test "parse deep" do
-    resolvers = %{
+    resolvers = [
       sample:
         {&identity/1,
-         %{
-           user: {&identity/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
-         }}
-    }
+         [
+           user: {&identity/1, [name: &reverse_text/1, surname: &reverse_text/1]}
+         ]}
+    ]
 
     data = %{
       sample: %{
@@ -59,9 +59,9 @@ defmodule Yson.ParserTest do
   end
 
   test "parse recasing to snake case" do
-    resolvers = %{
-      sample: {&identity/1, %{full_name: &identity/1}}
-    }
+    resolvers = [
+      sample: {&identity/1, [full_name: &identity/1]}
+    ]
 
     data = %{
       sample: %{
@@ -79,9 +79,9 @@ defmodule Yson.ParserTest do
   end
 
   test "parse recasing to camel case" do
-    resolvers = %{
-      sample: {&identity/1, %{fullName: &identity/1}}
-    }
+    resolvers = [
+      sample: {&identity/1, [fullName: &identity/1]}
+    ]
 
     data = %{
       sample: %{
@@ -99,9 +99,9 @@ defmodule Yson.ParserTest do
   end
 
   test "parse without recasing" do
-    resolvers = %{
-      sample: {&identity/1, %{fullName: &identity/1}}
-    }
+    resolvers = [
+      sample: {&identity/1, [fullName: &identity/1]}
+    ]
 
     data = %{
       sample: %{
@@ -113,7 +113,7 @@ defmodule Yson.ParserTest do
   end
 
   test "raise error when parsing with wrong case" do
-    resolvers = %{sample: {&identity/1}}
+    resolvers = [sample: {&identity/1}]
     data = %{sample: "foo"}
 
     assert_raise(RuntimeError, fn ->
@@ -122,9 +122,9 @@ defmodule Yson.ParserTest do
   end
 
   test "parse combining resolvers" do
-    resolvers = %{
-      sample: {&collapse_name/1, %{name: &reverse_text/1, surname: &reverse_text/1}}
-    }
+    resolvers = [
+      sample: {&collapse_name/1, [name: &reverse_text/1, surname: &reverse_text/1]}
+    ]
 
     data = %{
       sample: %{
@@ -143,15 +143,15 @@ defmodule Yson.ParserTest do
   end
 
   test "parse ignoring missing fields" do
-    resolvers = %{
+    resolvers = [
       sample:
         {&identity/1,
-         %{
+         [
            company_name: &identity/1,
            name: &identity/1,
            surname: &identity/1
-         }}
-    }
+         ]}
+    ]
 
     data = %{
       sample: %{
@@ -171,13 +171,13 @@ defmodule Yson.ParserTest do
   end
 
   test "parse ignoring extra fields" do
-    resolvers = %{
+    resolvers = [
       sample:
         {&identity/1,
-         %{
+         [
            name: &identity/1
-         }}
-    }
+         ]}
+    ]
 
     data = %{
       sample: %{
@@ -197,14 +197,14 @@ defmodule Yson.ParserTest do
   end
 
   test "parse parsing root lists" do
-    resolvers = %{
+    resolvers = [
       sample:
         {&identity/1,
-         %{
+         [
            name: &identity/1,
            surname: &identity/1
-         }}
-    }
+         ]}
+    ]
 
     data = %{
       sample: [
@@ -224,13 +224,13 @@ defmodule Yson.ParserTest do
   end
 
   test "parse parsing nested simple lists" do
-    resolvers = %{
+    resolvers = [
       sample:
         {&identity/1,
-         %{
+         [
            name: &identity/1
-         }}
-    }
+         ]}
+    ]
 
     data = %{
       sample: %{
@@ -242,18 +242,18 @@ defmodule Yson.ParserTest do
   end
 
   test "parse parsing nested complex lists" do
-    resolvers = %{
+    resolvers = [
       sample:
         {&identity/1,
-         %{
+         [
            users:
              {&identity/1,
-              %{
+              [
                 name: &identity/1,
                 surname: &identity/1
-              }}
-         }}
-    }
+              ]}
+         ]}
+    ]
 
     data = %{
       sample: %{

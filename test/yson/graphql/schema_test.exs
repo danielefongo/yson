@@ -50,9 +50,9 @@ defmodule Yson.GraphQL.SchemaTest do
     end
 
     test "generate resolvers" do
-      assert SampleQuery.resolvers() == %{
-               sample: {&identity/1, %{age: &identity/1, email: &identity/1}}
-             }
+      assert SampleQuery.resolvers() == [
+               sample: {&identity/1, [email: &identity/1, age: &identity/1]}
+             ]
     end
   end
 
@@ -68,9 +68,9 @@ defmodule Yson.GraphQL.SchemaTest do
     end
 
     test "generate resolvers" do
-      assert SampleMutation.resolvers() == %{
-               sample: {&identity/1, %{age: &identity/1, email: &identity/1}}
-             }
+      assert SampleMutation.resolvers() == [
+               sample: {&identity/1, [email: &identity/1, age: &identity/1]}
+             ]
     end
   end
 end

@@ -183,7 +183,7 @@ defmodule Yson.SchemaTest do
 
       {_, resolvers} = resolvers(InterfaceResolvers)
 
-      assert resolvers == %{one: &identity/1, two: &identity/1}
+      assert resolvers == [one: &identity/1, two: &identity/1]
     end
 
     test "references" do
@@ -234,7 +234,7 @@ defmodule Yson.SchemaTest do
 
       {_, resolvers} = resolvers(NestedInterfaceResolvers)
 
-      assert resolvers == %{foo: {&identity/1, %{one: &identity/1, two: &identity/1}}}
+      assert resolvers == [foo: {&identity/1, [one: &identity/1, two: &identity/1]}]
     end
   end
 
@@ -268,7 +268,7 @@ defmodule Yson.SchemaTest do
 
       {_, resolvers} = resolvers(MapResolvers)
 
-      assert resolvers == %{foo: {&identity/1, %{one: &identity/1, two: &identity/1}}}
+      assert resolvers == [foo: {&identity/1, [one: &identity/1, two: &identity/1]}]
     end
 
     test "custom resolvers" do
@@ -285,7 +285,7 @@ defmodule Yson.SchemaTest do
 
       {_, resolvers} = resolvers(MapCustomResolvers)
 
-      assert resolvers == %{foo: {&echo_resolver/1, %{one: &identity/1, two: &identity/1}}}
+      assert resolvers == [foo: {&echo_resolver/1, [one: &identity/1, two: &identity/1]}]
     end
 
     test "references" do
@@ -336,9 +336,7 @@ defmodule Yson.SchemaTest do
 
       assert resolvers(NestedMapResolvers) ==
                {&identity/1,
-                %{
-                  foo: {&identity/1, %{bar: {&identity/1, %{one: &identity/1, two: &identity/1}}}}
-                }}
+                [foo: {&identity/1, [bar: {&identity/1, [one: &identity/1, two: &identity/1]}]}]}
     end
   end
 
@@ -391,7 +389,7 @@ defmodule Yson.SchemaTest do
       end
 
       assert resolvers(ReferenceResolvers) ==
-               {&identity/1, %{foo: {&identity/1, %{one: &identity/1, two: &identity/1}}}}
+               {&identity/1, [foo: {&identity/1, [one: &identity/1, two: &identity/1]}]}
     end
 
     test "resolvers when aliased" do
@@ -409,7 +407,7 @@ defmodule Yson.SchemaTest do
       end
 
       assert resolvers(ReferenceAliasResolvers) ==
-               {&identity/1, %{bar: {&identity/1, %{one: &identity/1, two: &identity/1}}}}
+               {&identity/1, [bar: {&identity/1, [one: &identity/1, two: &identity/1]}]}
     end
   end
 
@@ -435,7 +433,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert resolvers(RootResolvers) == {&identity/1, %{foo: &identity/1}}
+      assert resolvers(RootResolvers) == {&identity/1, [foo: &identity/1]}
     end
 
     test "custom resolvers" do
@@ -447,7 +445,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert resolvers(CustomRootResolvers) == {&echo_resolver/1, %{foo: &identity/1}}
+      assert resolvers(CustomRootResolvers) == {&echo_resolver/1, [foo: &identity/1]}
     end
   end
 
@@ -473,7 +471,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert resolvers(ValueResolvers) == {&identity/1, %{foo: &identity/1}}
+      assert resolvers(ValueResolvers) == {&identity/1, [foo: &identity/1]}
     end
 
     test "custom resolvers" do
@@ -485,7 +483,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert resolvers(ValueCustomResolvers) == {&identity/1, %{foo: &echo_resolver/1}}
+      assert resolvers(ValueCustomResolvers) == {&identity/1, [foo: &echo_resolver/1]}
     end
   end
 end

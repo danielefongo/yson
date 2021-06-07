@@ -29,7 +29,7 @@ defmodule Yson.Parser do
   """
   def parse(resolvers, data, to_case \\ :no_case), do: inner_parse(resolvers, data, to_case)
 
-  defp inner_parse(resolvers, data, to_case) when is_map(resolvers) and is_map(data) do
+  defp inner_parse(resolvers, data, to_case) when is_list(resolvers) and is_map(data) do
     inner_parse_nested_map(resolvers, data, to_case)
   end
 
@@ -48,8 +48,8 @@ defmodule Yson.Parser do
   defp inner_parse_nested_map(resolvers, data, to_case) do
     data
     |> map(fn {key, val} -> {recase(key, to_case), val} end)
-    |> filter(fn {key, _} -> not is_nil(Map.get(resolvers, key)) end)
-    |> map(fn {key, val} -> {key, resolvers |> Map.get(key) |> inner_parse(val, to_case)} end)
+    |> filter(fn {key, _} -> not is_nil(Keyword.get(resolvers, key)) end)
+    |> map(fn {key, val} -> {key, resolvers |> Keyword.get(key) |> inner_parse(val, to_case)} end)
     |> into(%{})
   end
 

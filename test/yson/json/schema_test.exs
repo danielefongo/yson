@@ -21,6 +21,6 @@ defmodule Yson.Json.SchemaTest do
   end
 
   test "generate resolvers" do
-    assert Sample.resolvers() == {&echo_resolver/1, %{foo: &identity/1, bar: &identity/1}}
+    assert Sample.resolvers() == {&echo_resolver/1, [foo: &identity/1, bar: &identity/1]}
   end
 end

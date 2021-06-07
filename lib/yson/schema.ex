@@ -245,8 +245,8 @@ defmodule Yson.Schema do
   def resolvers(module),
     do: module |> Attributes.get!([:root]) |> Macro.postwalk(&inner_resolver/1)
 
-  defp inner_resolver({:root, [res, fields]}), do: {res, list_to_flat_map(fields)}
-  defp inner_resolver({:map, [name, res, fields]}), do: {name, {res, list_to_flat_map(fields)}}
+  defp inner_resolver({:root, [res, fields]}), do: {res, List.flatten(fields)}
+  defp inner_resolver({:map, [name, res, fields]}), do: {name, {res, List.flatten(fields)}}
   defp inner_resolver({:interface, [_name, fields]}), do: fields
   defp inner_resolver({:value, [name, res]}), do: {name, res}
   defp inner_resolver(node), do: node
