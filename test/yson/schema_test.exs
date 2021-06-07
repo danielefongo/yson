@@ -99,7 +99,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert describe(ReferencesDescriptionExtended) == %{foo: %{one: nil}}
+      assert describe(ReferencesDescriptionExtended) == [foo: [:one]]
     end
 
     test "don't propagate references" do
@@ -166,7 +166,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert describe(InterfaceDescription) == %{foo: [one: nil, two: nil]}
+      assert describe(InterfaceDescription) == [foo: {[:one, :two]}]
     end
 
     test "resolvers" do
@@ -215,7 +215,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert describe(NestedInterfaceDescription) == %{foo: %{bar: [one: nil, two: nil]}}
+      assert describe(NestedInterfaceDescription) == [foo: [bar: {[:one, :two]}]]
     end
 
     test "resolvers" do
@@ -251,7 +251,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert describe(MapDescription) == %{foo: %{one: nil, two: nil}}
+      assert describe(MapDescription) == [foo: [:one, :two]]
     end
 
     test "resolvers" do
@@ -317,7 +317,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert describe(NestedMapDescription) == %{foo: %{bar: %{one: nil, two: nil}}}
+      assert describe(NestedMapDescription) == [foo: [bar: [:one, :two]]]
     end
 
     test "resolvers" do
@@ -355,7 +355,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert describe(ReferenceDescription) == %{foo: %{one: nil, two: nil}}
+      assert describe(ReferenceDescription) == [foo: [:one, :two]]
     end
 
     test "description when aliased" do
@@ -371,7 +371,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert describe(ReferenceAliasDescription) == %{bar: %{one: nil}}
+      assert describe(ReferenceAliasDescription) == [bar: [:one]]
     end
 
     test "resolvers" do
@@ -421,7 +421,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert describe(RootDescription) == %{foo: nil}
+      assert describe(RootDescription) == [:foo]
     end
 
     test "resolvers" do
@@ -459,7 +459,7 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert describe(ValueDescription) == %{foo: nil}
+      assert describe(ValueDescription) == [:foo]
     end
 
     test "resolvers" do

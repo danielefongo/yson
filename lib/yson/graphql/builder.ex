@@ -105,20 +105,20 @@ defmodule Yson.GraphQL.Builder do
     "#{camel(key)}: {#{inner}}"
   end
 
-  defp build_body(data) when is_map(data), do: inner_build_body(data)
+  defp build_body(data) when is_list(data), do: inner_build_body(data)
 
-  defp inner_build_body(data) when is_map(data), do: Enum.map(data, &inner_build_body/1)
+  defp inner_build_body(data) when is_list(data), do: Enum.map(data, &inner_build_body/1)
 
-  defp inner_build_body({key, value}) when is_nil(value), do: [camel(key)]
+  defp inner_build_body(key) when is_atom(key), do: [camel(key)]
 
-  defp inner_build_body({key, value}) when is_map(value) do
+  defp inner_build_body({key, {value}}) when is_list(value) do
     inner = Enum.map(value, &inner_build_body/1)
-    ["#{key} {"] ++ inner ++ ["}"]
+    ["... on #{pascal(key)} {"] ++ inner ++ ["}"]
   end
 
   defp inner_build_body({key, value}) when is_list(value) do
-    inner = value |> Enum.into(%{}) |> Enum.map(&inner_build_body/1)
-    ["... on #{pascal(key)} {"] ++ inner ++ ["}"]
+    inner = Enum.map(value, &inner_build_body/1)
+    ["#{key} {"] ++ inner ++ ["}"]
   end
 
   defp camel(value), do: value |> Atom.to_string() |> Recase.to_camel()

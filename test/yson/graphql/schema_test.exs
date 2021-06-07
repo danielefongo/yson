@@ -44,7 +44,7 @@ defmodule Yson.GraphQL.SchemaTest do
 
       assert description.object == :sample
 
-      assert description.body == %{sample: %{age: nil, email: nil}}
+      assert description.body == [sample: [:email, :age]]
 
       assert description.arguments == %{data: :string, user: %{email: :string, age: :integer}}
     end
@@ -62,7 +62,7 @@ defmodule Yson.GraphQL.SchemaTest do
 
       assert description.object == :sample
 
-      assert description.body == %{sample: %{age: nil, email: nil}}
+      assert description.body == [sample: [:email, :age]]
 
       assert description.arguments == %{data: :string, user: %{email: :string, age: :integer}}
     end

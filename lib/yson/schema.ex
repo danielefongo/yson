@@ -235,10 +235,10 @@ defmodule Yson.Schema do
   def describe(module),
     do: module |> Attributes.get!([:root]) |> Macro.postwalk(&inner_describe/1)
 
-  defp inner_describe({:root, [_res, fields]}), do: Enum.into(fields, %{})
-  defp inner_describe({:map, [name, _res, fields]}), do: {name, Enum.into(fields, %{})}
-  defp inner_describe({:interface, [name, fields]}), do: {name, fields}
-  defp inner_describe({:value, [name, _res]}), do: {name, nil}
+  defp inner_describe({:root, [_res, fields]}), do: fields
+  defp inner_describe({:map, [name, _res, fields]}), do: {name, fields}
+  defp inner_describe({:interface, [name, fields]}), do: {name, {fields}}
+  defp inner_describe({:value, [name, _res]}), do: name
   defp inner_describe(node), do: node
 
   @doc false
@@ -303,6 +303,4 @@ defmodule Yson.Schema do
       raise "Found circular dependency in #{inspect(references_stack)}"
     end
   end
-
-  defp list_to_flat_map(list), do: list |> List.flatten() |> Enum.into(%{})
 end

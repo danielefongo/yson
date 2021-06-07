@@ -53,7 +53,7 @@ defmodule Yson.GraphQL.Schema do
     kind = request[:kind]
     arguments = Enum.into(request[:arguments], %{})
 
-    body = Map.put(%{}, object, Yson.Schema.describe(module))
+    body = Keyword.put([], object, Yson.Schema.describe(module))
     resolvers = Keyword.put([], object, Yson.Schema.resolvers(module))
 
     quote do

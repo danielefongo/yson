@@ -17,7 +17,7 @@ defmodule Yson.Json.SchemaTest do
   test "generate description" do
     description = Sample.describe()
 
-    assert description == %{foo: nil, bar: nil}
+    assert description == [:foo, :bar]
   end
 
   test "generate resolvers" do
