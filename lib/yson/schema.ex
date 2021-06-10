@@ -171,7 +171,7 @@ defmodule Yson.Schema do
   You can also specify custom resolver to parse data. It can be either a reference or an anonymous function.
 
   ### Example
-      value(:name, &String.revers/1)
+      value(:name, &String.reverse/1)
   """
   defmacro value(name, resolver \\ &identity/1) do
     quote do
