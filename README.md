@@ -14,7 +14,7 @@ The package can be installed by adding `yson` to your list of dependencies in `m
 ```elixir
 def deps do
   [
-    {:yson, "~> 0.1.0"}
+    {:yson, "~> 0.2.0"}
   ]
 end
 ```
