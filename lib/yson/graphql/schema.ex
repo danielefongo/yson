@@ -65,7 +65,7 @@ defmodule Yson.GraphQL.Schema do
           body: unquote(Macro.escape(body))
         }
 
-      def resolvers, do: unquote(Macro.escape(resolvers))
+      def resolvers, do: unquote(resolvers)
     end
   end
 
@@ -134,8 +134,6 @@ defmodule Yson.GraphQL.Schema do
         object: unquote(name),
         arguments: unquote(body)
       )
-
-      Enum.into(unquote(body), %{})
     end
   end
 end

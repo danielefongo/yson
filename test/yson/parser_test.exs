@@ -1,14 +1,18 @@
 defmodule Yson.ParserTest do
   use ExUnit.Case
   alias Yson.Parser
-  import Function, only: [identity: 1]
 
   def reverse_text(data), do: String.reverse(data)
   def collapse_name(%{name: name, surname: surname}), do: %{full_name: "#{name} #{surname}"}
 
+  @identity_resolver {Function, :identity}
+  @reverse_text_resolver {Yson.ParserTest, :reverse_text}
+  @collapse_name_resolver {Yson.ParserTest, :collapse_name}
+
   test "parse shallow" do
     resolvers = [
-      sample: {&identity/1, [name: &reverse_text/1, surname: &reverse_text/1]}
+      sample:
+        {@identity_resolver, [name: @reverse_text_resolver, surname: @reverse_text_resolver]}
     ]
 
     data = %{
@@ -31,9 +35,10 @@ defmodule Yson.ParserTest do
   test "parse deep" do
     resolvers = [
       sample:
-        {&identity/1,
+        {@identity_resolver,
          [
-           user: {&identity/1, [name: &reverse_text/1, surname: &reverse_text/1]}
+           user:
+             {@identity_resolver, [name: @reverse_text_resolver, surname: @reverse_text_resolver]}
          ]}
     ]
 
@@ -60,7 +65,7 @@ defmodule Yson.ParserTest do
 
   test "parse recasing to snake case" do
     resolvers = [
-      sample: {&identity/1, [full_name: &identity/1]}
+      sample: {@identity_resolver, [full_name: @identity_resolver]}
     ]
 
     data = %{
@@ -80,7 +85,7 @@ defmodule Yson.ParserTest do
 
   test "parse recasing to camel case" do
     resolvers = [
-      sample: {&identity/1, [fullName: &identity/1]}
+      sample: {@identity_resolver, [fullName: @identity_resolver]}
     ]
 
     data = %{
@@ -100,7 +105,7 @@ defmodule Yson.ParserTest do
 
   test "parse without recasing" do
     resolvers = [
-      sample: {&identity/1, [fullName: &identity/1]}
+      sample: {@identity_resolver, [fullName: @identity_resolver]}
     ]
 
     data = %{
@@ -113,7 +118,7 @@ defmodule Yson.ParserTest do
   end
 
   test "raise error when parsing with wrong case" do
-    resolvers = [sample: {&identity/1}]
+    resolvers = [sample: {@identity_resolver}]
     data = %{sample: "foo"}
 
     assert_raise(RuntimeError, fn ->
@@ -123,7 +128,8 @@ defmodule Yson.ParserTest do
 
   test "parse combining resolvers" do
     resolvers = [
-      sample: {&collapse_name/1, [name: &reverse_text/1, surname: &reverse_text/1]}
+      sample:
+        {@collapse_name_resolver, [name: @reverse_text_resolver, surname: @reverse_text_resolver]}
     ]
 
     data = %{
@@ -145,11 +151,11 @@ defmodule Yson.ParserTest do
   test "parse ignoring missing fields" do
     resolvers = [
       sample:
-        {&identity/1,
+        {@identity_resolver,
          [
-           company_name: &identity/1,
-           name: &identity/1,
-           surname: &identity/1
+           company_name: @identity_resolver,
+           name: @identity_resolver,
+           surname: @identity_resolver
          ]}
     ]
 
@@ -173,9 +179,9 @@ defmodule Yson.ParserTest do
   test "parse ignoring extra fields" do
     resolvers = [
       sample:
-        {&identity/1,
+        {@identity_resolver,
          [
-           name: &identity/1
+           name: @identity_resolver
          ]}
     ]
 
@@ -199,10 +205,10 @@ defmodule Yson.ParserTest do
   test "parse parsing root lists" do
     resolvers = [
       sample:
-        {&identity/1,
+        {@identity_resolver,
          [
-           name: &identity/1,
-           surname: &identity/1
+           name: @identity_resolver,
+           surname: @identity_resolver
          ]}
     ]
 
@@ -226,9 +232,9 @@ defmodule Yson.ParserTest do
   test "parse parsing nested simple lists" do
     resolvers = [
       sample:
-        {&identity/1,
+        {@identity_resolver,
          [
-           name: &identity/1
+           name: @identity_resolver
          ]}
     ]
 
@@ -244,13 +250,13 @@ defmodule Yson.ParserTest do
   test "parse parsing nested complex lists" do
     resolvers = [
       sample:
-        {&identity/1,
+        {@identity_resolver,
          [
            users:
-             {&identity/1,
+             {@identity_resolver,
               [
-                name: &identity/1,
-                surname: &identity/1
+                name: @identity_resolver,
+                surname: @identity_resolver
               ]}
          ]}
     ]

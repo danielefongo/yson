@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- resolvers: enable partial local references (like `&my_resolver/1`) and anonymous functions.
+
 ### Changed
 
 - `Yson.Schema.reference/2`: additional `as` option to rename referenced field.

@@ -111,7 +111,7 @@ defmodule Yson.Schema do
         value(:name)
       end
 
-  You can also specify custom resolver to parse data.
+  You can also specify custom resolver to parse data. It can be either a reference or an anonymous function.
 
   ### Example
       reverse_name = fn %{name: name} -> %{name: String.reverse(name)} end
@@ -125,7 +125,11 @@ defmodule Yson.Schema do
     resolver = get_resolver(opts)
 
     quote do
-      Attributes.set!(unquote(module), [:root], {:root, [unquote(resolver), unquote(fields)]})
+      Attributes.set!(
+        unquote(module),
+        [:root],
+        {:root, [create_resolver(unquote(resolver)), unquote(fields)]}
+      )
     end
   end
 
@@ -164,7 +168,11 @@ defmodule Yson.Schema do
   ### Example
       value(:referenced)
   """
-  defmacro value(name, resolver \\ quote(do: &identity/1)), do: {:value, [name, resolver]}
+  defmacro value(name, resolver \\ &identity/1) do
+    quote do
+      {:value, [unquote(name), create_resolver(unquote(resolver))]}
+    end
+  end
 
   @doc """
   Defines a interface.
@@ -204,7 +212,7 @@ defmodule Yson.Schema do
         value(:name)
       end
 
-  You can also specify custom resolver to parse data.
+  You can also specify custom resolver to parse data. It can be either a reference or an anonymous function.
 
   ### Example
       reverse_name = fn %{name: name} -> %{name: String.reverse(name)} end
@@ -218,7 +226,7 @@ defmodule Yson.Schema do
     resolver = get_resolver(opts)
 
     quote do
-      node = {:map, [unquote(name), unquote(resolver), unquote(fields)]}
+      node = {:map, [unquote(name), create_resolver(unquote(resolver)), unquote(fields)]}
       Attributes.set!(unquote(module), [:references, unquote(name)], node)
     end
   end
@@ -228,7 +236,41 @@ defmodule Yson.Schema do
     fields = get_fields(body)
     resolver = get_resolver(opts)
 
-    {:map, [name, resolver, fields]}
+    quote do
+      {:map, [unquote(name), create_resolver(unquote(resolver)), unquote(fields)]}
+    end
+  end
+
+  @doc false
+  defmacro create_resolver(resolver) do
+    module = __CALLER__.module
+    resolver_reference = generate_resolver_name(module)
+
+    quote do
+      key =
+        Macro.postwalk(unquote(Macro.escape(resolver)), fn node ->
+          case node do
+            {_, metadata, _} -> Macro.update_meta(node, &Keyword.delete(&1, :line))
+            _ -> node
+          end
+        end)
+
+      resolvers = Attributes.get(unquote(module), [:resolvers], %{})
+
+      resolver_reference =
+        case resolvers[key] do
+          nil ->
+            def unquote(resolver_reference)(data), do: unquote(resolver).(data)
+            {unquote(module), unquote(resolver_reference)}
+
+          ref ->
+            ref
+        end
+
+      Attributes.set(unquote(module), [:resolvers], Map.put(resolvers, key, resolver_reference))
+
+      resolver_reference
+    end
   end
 
   @doc false
@@ -302,5 +344,12 @@ defmodule Yson.Schema do
     if Enum.member?(references_stack, reference) do
       raise "Found circular dependency in #{inspect(references_stack)}"
     end
+  end
+
+  defp generate_resolver_name(module) do
+    resolver_count = Attributes.get(module, [:resolvers_count], 0)
+    Attributes.set(module, [:resolvers_count], resolver_count + 1)
+
+    String.to_atom("resolver_#{resolver_count}")
   end
 end

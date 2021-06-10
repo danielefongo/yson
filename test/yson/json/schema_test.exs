@@ -1,12 +1,10 @@
 defmodule Yson.Json.SchemaTest do
   use ExUnit.Case
-  import Function, only: [identity: 1]
-  import Support.Macro
 
   defmodule Sample do
     use Yson.Json.Schema
 
-    root resolver: &echo_resolver/1 do
+    root do
       value(:foo)
       value(:bar)
     end
@@ -21,6 +19,6 @@ defmodule Yson.Json.SchemaTest do
   end
 
   test "generate resolvers" do
-    assert Sample.resolvers() == {&echo_resolver/1, [foo: &identity/1, bar: &identity/1]}
+    assert {_, [foo: _, bar: _]} = Sample.resolvers()
   end
 end

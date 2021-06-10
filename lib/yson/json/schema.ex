@@ -40,8 +40,8 @@ defmodule Yson.Json.Schema do
     resolvers = Yson.Schema.resolvers(module)
 
     quote do
-      def describe, do: unquote(Macro.escape(body))
-      def resolvers, do: unquote(Macro.escape(resolvers))
+      def describe, do: unquote(body)
+      def resolvers, do: unquote(resolvers)
     end
   end
 end

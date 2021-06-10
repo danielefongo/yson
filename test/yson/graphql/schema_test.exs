@@ -1,6 +1,5 @@
 defmodule Yson.GraphQL.SchemaTest do
   use ExUnit.Case
-  import Function, only: [identity: 1]
 
   defmodule SampleQuery do
     use Yson.GraphQL.Schema
@@ -50,9 +49,7 @@ defmodule Yson.GraphQL.SchemaTest do
     end
 
     test "generate resolvers" do
-      assert SampleQuery.resolvers() == [
-               sample: {&identity/1, [email: &identity/1, age: &identity/1]}
-             ]
+      assert [sample: {_, [email: _, age: _]}] = SampleQuery.resolvers()
     end
   end
 
@@ -68,9 +65,7 @@ defmodule Yson.GraphQL.SchemaTest do
     end
 
     test "generate resolvers" do
-      assert SampleMutation.resolvers() == [
-               sample: {&identity/1, [email: &identity/1, age: &identity/1]}
-             ]
+      assert [sample: {_, [email: _, age: _]}] = SampleMutation.resolvers()
     end
   end
 end

@@ -1,8 +1,6 @@
 defmodule Yson.SchemaTest do
   use ExUnit.Case
   import Yson.Schema
-  import Function, only: [identity: 1]
-  import Support.Macro
 
   describe "circular references" do
     test "raise error on self reference" do
@@ -181,9 +179,12 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      {_, resolvers} = resolvers(InterfaceResolvers)
+      expected_resolver = {InterfaceResolvers, :resolver_0}
 
-      assert resolvers == [one: &identity/1, two: &identity/1]
+      {^expected_resolver, [one: ^expected_resolver, two: ^expected_resolver]} =
+        resolvers(InterfaceResolvers)
+
+      assert execute_resolver(expected_resolver, :any) == :any
     end
 
     test "references" do
@@ -232,9 +233,13 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      {_, resolvers} = resolvers(NestedInterfaceResolvers)
+      expected_resolver = {NestedInterfaceResolvers, :resolver_0}
 
-      assert resolvers == [foo: {&identity/1, [one: &identity/1, two: &identity/1]}]
+      {^expected_resolver,
+       [foo: {^expected_resolver, [one: ^expected_resolver, two: ^expected_resolver]}]} =
+        resolvers(NestedInterfaceResolvers)
+
+      assert execute_resolver(expected_resolver, :any) == :any
     end
   end
 
@@ -266,9 +271,13 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      {_, resolvers} = resolvers(MapResolvers)
+      expected_resolver = {MapResolvers, :resolver_0}
 
-      assert resolvers == [foo: {&identity/1, [one: &identity/1, two: &identity/1]}]
+      {^expected_resolver,
+       [foo: {^expected_resolver, [one: ^expected_resolver, two: ^expected_resolver]}]} =
+        resolvers(MapResolvers)
+
+      assert execute_resolver(expected_resolver, :any) == :any
     end
 
     test "custom resolvers" do
@@ -276,16 +285,16 @@ defmodule Yson.SchemaTest do
         use Yson.Schema
 
         root do
-          map :foo, resolver: &echo_resolver/1 do
+          map :foo, resolver: fn _ -> send(self(), "map custom") end do
             value(:one)
             value(:two)
           end
         end
       end
 
-      {_, resolvers} = resolvers(MapCustomResolvers)
+      {_, [foo: {resolver, _}]} = resolvers(MapCustomResolvers)
 
-      assert resolvers == [foo: {&echo_resolver/1, [one: &identity/1, two: &identity/1]}]
+      assert_resolver(resolver, "map custom")
     end
 
     test "references" do
@@ -328,15 +337,19 @@ defmodule Yson.SchemaTest do
           map :foo do
             map :bar do
               value(:one)
-              value(:two)
             end
           end
         end
       end
 
-      assert resolvers(NestedMapResolvers) ==
-               {&identity/1,
-                [foo: {&identity/1, [bar: {&identity/1, [one: &identity/1, two: &identity/1]}]}]}
+      expected_resolver = {NestedMapResolvers, :resolver_0}
+
+      {^expected_resolver,
+       [
+         foo: {^expected_resolver, [bar: {^expected_resolver, [one: ^expected_resolver]}]}
+       ]} = resolvers(NestedMapResolvers)
+
+      assert execute_resolver(expected_resolver, :any) == :any
     end
   end
 
@@ -388,8 +401,11 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert resolvers(ReferenceResolvers) ==
-               {&identity/1, [foo: {&identity/1, [one: &identity/1, two: &identity/1]}]}
+      expected_resolver = {ReferenceResolvers, :resolver_0}
+
+      assert {^expected_resolver,
+              [foo: {^expected_resolver, [one: ^expected_resolver, two: ^expected_resolver]}]} =
+               resolvers(ReferenceResolvers)
     end
 
     test "resolvers when aliased" do
@@ -402,12 +418,15 @@ defmodule Yson.SchemaTest do
 
         map :foo do
           value(:one)
-          value(:two)
         end
       end
 
-      assert resolvers(ReferenceAliasResolvers) ==
-               {&identity/1, [bar: {&identity/1, [one: &identity/1, two: &identity/1]}]}
+      expected_resolver = {ReferenceAliasResolvers, :resolver_0}
+
+      {^expected_resolver, [bar: {^expected_resolver, [one: ^expected_resolver]}]} =
+        resolvers(ReferenceAliasResolvers)
+
+      assert execute_resolver(expected_resolver, :any) == :any
     end
   end
 
@@ -433,19 +452,25 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert resolvers(RootResolvers) == {&identity/1, [foo: &identity/1]}
+      expected_resolver = {RootResolvers, :resolver_0}
+
+      {^expected_resolver, [foo: _]} = resolvers(RootResolvers)
+
+      assert execute_resolver(expected_resolver, :any) == :any
     end
 
     test "custom resolvers" do
       defmodule CustomRootResolvers do
         use Yson.Schema
 
-        root resolver: &echo_resolver/1 do
+        root resolver: fn _ -> send(self(), "root custom") end do
           value(:foo)
         end
       end
 
-      assert resolvers(CustomRootResolvers) == {&echo_resolver/1, [foo: &identity/1]}
+      {resolver, [foo: _]} = resolvers(CustomRootResolvers)
+
+      assert_resolver(resolver, "root custom")
     end
   end
 
@@ -471,7 +496,11 @@ defmodule Yson.SchemaTest do
         end
       end
 
-      assert resolvers(ValueResolvers) == {&identity/1, [foo: &identity/1]}
+      expected_resolver = {ValueResolvers, :resolver_0}
+
+      {_, [foo: ^expected_resolver]} = resolvers(ValueResolvers)
+
+      assert execute_resolver(expected_resolver, :any) == :any
     end
 
     test "custom resolvers" do
@@ -479,11 +508,133 @@ defmodule Yson.SchemaTest do
         use Yson.Schema
 
         root do
-          value(:foo, &echo_resolver/1)
+          value(:foo, fn _ -> send(self(), "value custom") end)
         end
       end
 
-      assert resolvers(ValueCustomResolvers) == {&identity/1, [foo: &echo_resolver/1]}
+      {_, [foo: resolver]} = resolvers(ValueCustomResolvers)
+
+      assert_resolver(resolver, "value custom")
     end
+  end
+
+  describe "resolvers" do
+    test "default is identity" do
+      defmodule ResolverIdentity do
+        use Yson.Schema
+
+        root do
+          value(:foo)
+        end
+      end
+
+      resolver = {ResolverIdentity, :resolver_0}
+
+      {^resolver, _} = resolvers(ResolverIdentity)
+    end
+
+    test "private function" do
+      defmodule ResolverPrivateFunction do
+        use Yson.Schema
+
+        root resolver: &private/1 do
+          value(:foo)
+        end
+
+        defp private(_), do: :private
+      end
+
+      {resolver, _} = resolvers(ResolverPrivateFunction)
+
+      assert execute_resolver(resolver, :any) == :private
+    end
+
+    test "anonymous function" do
+      defmodule ResolverAnonymousFunction do
+        use Yson.Schema
+
+        root resolver: & &1 do
+          value(:foo)
+        end
+      end
+
+      {resolver, _} = resolvers(ResolverAnonymousFunction)
+
+      assert execute_resolver(resolver, :any) == :any
+    end
+
+    test "increase counter on different resolver" do
+      defmodule ResolverDifferentResolverCount do
+        use Yson.Schema
+
+        root do
+          value(:foo, & &1)
+        end
+      end
+
+      assert {{ResolverDifferentResolverCount, :resolver_0},
+              [foo: {ResolverDifferentResolverCount, :resolver_1}]} =
+               resolvers(ResolverDifferentResolverCount)
+    end
+
+    test "same resolvers do not generate different functions" do
+      defmodule ResolverSameFunctions do
+        use Yson.Schema
+
+        root resolver: & &1 do
+          value(:foo, & &1)
+        end
+      end
+
+      resolver = {ResolverSameFunctions, :resolver_0}
+
+      assert {^resolver, [foo: ^resolver]} = resolvers(ResolverSameFunctions)
+    end
+
+    test "same resolvers do not generate different complex functions" do
+      defmodule ResolverSameComplexFunctions do
+        use Yson.Schema
+
+        root resolver: fn a ->
+               Function.identity(a)
+             end do
+          value(:foo, fn a -> Function.identity(a) end)
+        end
+      end
+
+      resolver = {ResolverSameComplexFunctions, :resolver_0}
+
+      assert {^resolver, [foo: ^resolver]} = resolvers(ResolverSameComplexFunctions)
+    end
+
+    test "import schema" do
+      defmodule ResolverSchemaBase do
+        use Yson.Schema
+
+        map :foo, resolver: & &1 do
+          value(:bar)
+        end
+      end
+
+      defmodule ResolverSchemaExtended do
+        use Yson.Schema
+
+        import_schema(ResolverSchemaBase)
+
+        root do
+          reference(:foo)
+        end
+      end
+
+      assert {{ResolverSchemaExtended, :resolver_0},
+              [foo: {{ResolverSchemaBase, :resolver_0}, _}]} = resolvers(ResolverSchemaExtended)
+    end
+  end
+
+  defp execute_resolver({module, fun}, value), do: apply(module, fun, [value])
+
+  defp assert_resolver(resolver, expected_value) do
+    execute_resolver(resolver, [:any])
+    assert_received ^expected_value
   end
 end

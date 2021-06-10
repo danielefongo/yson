@@ -10,7 +10,7 @@ defmodule Support.Client do
     end
   end
 
-  root do
+  root resolver: & &1 do
     value(:email)
     reference(:my_person, as: :person)
   end
