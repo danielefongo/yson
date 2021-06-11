@@ -21,4 +21,12 @@ defmodule Yson.Json.SchemaTest do
   test "generate resolvers" do
     assert {_, [foo: _, bar: _]} = Sample.resolvers()
   end
+
+  test "check missing root" do
+    assert_raise RuntimeError, fn ->
+      defmodule MissingRoot do
+        use Yson.Json.Schema
+      end
+    end
+  end
 end

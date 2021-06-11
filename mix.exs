@@ -2,7 +2,7 @@ defmodule Yson.Builder.MixProject do
   use Mix.Project
 
   @github "https://github.com/danielefongo/yson"
-  @version "0.2.0"
+  @version "0.2.1"
 
   def project do
     [

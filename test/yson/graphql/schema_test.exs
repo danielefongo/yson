@@ -68,4 +68,30 @@ defmodule Yson.GraphQL.SchemaTest do
       assert [sample: {_, [email: _, age: _]}] = SampleMutation.resolvers()
     end
   end
+
+  describe "check" do
+    test "missing query" do
+      assert_raise RuntimeError, fn ->
+        defmodule MissingQuery do
+          use Yson.GraphQL.Schema
+
+          root do
+            value(:foo)
+          end
+        end
+      end
+    end
+
+    test "missing root" do
+      assert_raise RuntimeError, fn ->
+        defmodule MissingRoot do
+          use Yson.GraphQL.Schema
+
+          query :sample do
+            arg(:foo, :string)
+          end
+        end
+      end
+    end
+  end
 end

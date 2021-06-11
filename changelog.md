@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.2.1] - 2021-06-11
+
+### Fixed
+
+- `Yson.Schema.root/3`: mandatory on `Yson.Json.Schema` and `Yson.GraphQL.Schema`.
+
 ## [0.2.0] - 2021-06-10
 
 ### Added
@@ -25,6 +31,7 @@ All notable changes to this project will be documented in this file.
 - `Yson.Parser`: json/graphql response parser
 - `Yson.Schema`: basic schema object
 
-[unreleased]: https://github.com/danielefongo/yson/compare/v0.2.0...HEAD
+[unreleased]: https://github.com/danielefongo/yson/compare/v0.2.1...HEAD
+[0.2.0]: https://github.com/danielefongo/yson/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/danielefongo/yson/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/danielefongo/yson/releases/tag/v0.1.0

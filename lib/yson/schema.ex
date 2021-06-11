@@ -56,7 +56,7 @@ defmodule Yson.Schema do
     squashed_refs = resolve_references(references, module, [])
 
     Attributes.set(module, [:references], squashed_refs)
-    Attributes.update(module, [:root], [], &resolve_references(&1, module))
+    Attributes.update(module, [:root], &resolve_references(&1, module, []))
   end
 
   @doc """
@@ -300,7 +300,9 @@ defmodule Yson.Schema do
   defp get_resolver(opts), do: Keyword.get(opts, :resolver, &identity/1)
   defp get_fields(body), do: fetch(body, @allowed_macros, @mapping)
 
-  defp resolve_references(references, module, references_stack \\ []) do
+  defp resolve_references(nil, _module, _references_stack), do: nil
+
+  defp resolve_references(references, module, references_stack) do
     Macro.postwalk(references, fn node ->
       case node do
         {:reference, [ref, as]} ->
