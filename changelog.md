@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- `Yson.Parser.parse/3`: parse null objects ignoring nested resolvers.
+
 ## [0.2.1] - 2021-06-11
 
 ### Fixed

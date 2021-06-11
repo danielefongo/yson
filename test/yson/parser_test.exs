@@ -176,6 +176,21 @@ defmodule Yson.ParserTest do
     assert Parser.parse(resolvers, data) == expected_data
   end
 
+  test "parse null objects ignoring nested resolvers" do
+    resolvers = [
+      sample:
+        {@identity_resolver,
+         [
+           name: @identity_resolver,
+           surname: @identity_resolver
+         ]}
+    ]
+
+    data = %{sample: nil}
+
+    assert Parser.parse(resolvers, data) == data
+  end
+
   test "parse ignoring extra fields" do
     resolvers = [
       sample:

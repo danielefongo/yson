@@ -33,6 +33,8 @@ defmodule Yson.Parser do
     inner_parse_nested_map(resolvers, data, to_case)
   end
 
+  defp inner_parse({resolver, _resolvers}, nil, _to_case), do: apply_resolver(nil, resolver)
+
   defp inner_parse({resolver, resolvers}, data, to_case) when is_map(data) do
     resolvers
     |> inner_parse_nested_map(data, to_case)
