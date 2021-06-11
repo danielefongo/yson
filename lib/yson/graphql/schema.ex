@@ -55,6 +55,7 @@ defmodule Yson.GraphQL.Schema do
 
     body = Keyword.put([], object, Yson.Schema.describe(module))
     resolvers = Keyword.put([], object, Yson.Schema.resolvers(module))
+    Attributes.delete(module)
 
     quote do
       def describe,

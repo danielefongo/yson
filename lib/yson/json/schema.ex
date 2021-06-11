@@ -38,6 +38,7 @@ defmodule Yson.Json.Schema do
 
     body = Yson.Schema.describe(module)
     resolvers = Yson.Schema.resolvers(module)
+    Attributes.delete(module)
 
     quote do
       def describe, do: unquote(body)
